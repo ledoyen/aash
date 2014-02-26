@@ -16,8 +16,8 @@ public class Lists2 {
 	@SuppressWarnings("unchecked")
 	private static <T> void flatten(Collection<?> fromTreeList, List<T> toFlatList) {
 		for (Object item : fromTreeList) {
-			if (item instanceof List<?>) {
-				flatten((List<?>) item, toFlatList);
+			if (item instanceof Collection<?>) {
+				flatten((Collection<?>) item, toFlatList);
 			} else {
 				toFlatList.add((T) item);
 			}

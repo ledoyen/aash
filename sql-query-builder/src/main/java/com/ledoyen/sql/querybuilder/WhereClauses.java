@@ -11,6 +11,6 @@ public final class WhereClauses {
 	private WhereClauses() {}
 
 	public static List<String> getParameterNames(WhereClause[] clauses) {
-		return Lists2.flatten(Collections2.transform(Lists.newArrayList(clauses), new WhereClause.GetParameterNames()));
+		return Lists2.flatten(Collections2.transform(Collections2.filter(Lists.newArrayList(clauses), new WhereClause.IsApplicableFilter()), new WhereClause.GetParameterNames()));
 	}
 }
