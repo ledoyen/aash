@@ -3,10 +3,13 @@ package com.ledoyen.sql.querybuilder.jdbc;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
 import com.ledoyen.sql.querybuilder.AbstractQueryBuilder;
 import com.ledoyen.sql.querybuilder.WhereClause;
+import com.ledoyen.sql.querybuilder.WhereClauses;
 
 public final class PreparedStatementBuilder extends AbstractQueryBuilder {
 
@@ -26,15 +29,34 @@ public final class PreparedStatementBuilder extends AbstractQueryBuilder {
 		return (PreparedStatementBuilder) super.groupOrOrder(groupOrOrderClause);
 	}
 
+	public String getQueryAsString() {
+		return buildPositionQueryAndMap(super.getQueryAsString(), WhereClauses.getParameterNames(clauses)).positionQuery;
+	}
+
 	public PreparedStatement preparedStatement(Connection connection) throws SQLException {
-		PreparedStatement preparedStatement = connection.prepareStatement(getQueryAsString());
-		QueryAdapter queryAdapter = new PreparedStatementAdapter(preparedStatement, null);
+		String queryWithNamedParameters = super.getQueryAsString();
+		
+		PositionQueryAndMap positionQueryAndMap = buildPositionQueryAndMap(queryWithNamedParameters, WhereClauses.getParameterNames(clauses));
+		PreparedStatement preparedStatement = connection.prepareStatement(positionQueryAndMap.positionQuery);
+		QueryAdapter queryAdapter = new PreparedStatementAdapter(preparedStatement, positionQueryAndMap.positionMap);
 		for (WhereClause whereClause : clauses) {
 			if (whereClause.isApplicable()) {
 				whereClause.apply(queryAdapter);
 			}
 		}
 		return preparedStatement;
+	}
+
+	private static PositionQueryAndMap buildPositionQueryAndMap(final String queryWithNamedParameters, List<String> parameterNames) {
+		String positionQuery = queryWithNamedParameters;
+		Map<String, Integer> positionMap = Maps.newHashMap();
+		int position = 0;
+		for(String parameterName : parameterNames) {
+			position++;
+			positionQuery = positionQuery.replaceFirst(":" + parameterName, "?");
+			positionMap.put(parameterName, position);
+		}
+		return new PositionQueryAndMap(positionQuery, positionMap);
 	}
 
 	private static class PreparedStatementAdapter implements QueryAdapter {
@@ -52,6 +74,16 @@ public final class PreparedStatementBuilder extends AbstractQueryBuilder {
 			} catch (SQLException e) {
 				throw new IllegalArgumentException(e);
 			}
+		}
+	}
+
+	private static class PositionQueryAndMap {
+		private String positionQuery;
+		private Map<String, Integer> positionMap;
+		
+		public PositionQueryAndMap(String positionQuery, Map<String, Integer> positionMap) {
+			this.positionQuery = positionQuery;
+			this.positionMap = positionMap;
 		}
 	}
 }

@@ -43,6 +43,16 @@ public class NativeQueryBuilderTest implements UserClauses {
 		System.out.println(results);
 	}
 
+	@Test(expected=IllegalArgumentException.class)
+	public void duplicateParameterNames() {
+		Integer ageMin = 7, ageMax = 77;
+
+		NativeQueryBuilder
+				.select(INITIAL_SELECT)
+				.where(USER_AGE.with(ageMin, ageMax),
+						USER_AGE.with(ageMin, ageMax));
+	}
+
 	private EntityManager getEntityManager() {
 		// TODO stub the damned thing
 		return null;

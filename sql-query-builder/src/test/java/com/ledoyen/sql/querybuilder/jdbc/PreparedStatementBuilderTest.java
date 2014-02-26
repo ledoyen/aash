@@ -25,7 +25,7 @@ public class PreparedStatementBuilderTest implements UserClauses {
 		Date startDate = new Date(), endDate = null;
 		List<String> variableNames = Lists.newArrayList("toto");
 
-		PreparedStatementBuilder nqb = PreparedStatementBuilder
+		PreparedStatementBuilder psb = PreparedStatementBuilder
 				.select(INITIAL_SELECT)
 				.where(JOIN_USER_CIVILITY,
 						JOIN_USER_PROFILE_VALUE,
@@ -41,8 +41,18 @@ public class PreparedStatementBuilderTest implements UserClauses {
 						BUSINESS_UNIT_CODE.with(code))
 				.groupOrOrder("group by pv.var_name");
 
-		System.out.println(nqb.getQueryAsString());
-		ResultSet results = nqb.preparedStatement(connection).executeQuery();
+		System.out.println(psb.getQueryAsString());
+		ResultSet results = psb.preparedStatement(connection).executeQuery();
 		System.out.println(results);
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void duplicateParameterNames() {
+		Integer ageMin = 7, ageMax = 77;
+
+		PreparedStatementBuilder
+				.select(INITIAL_SELECT)
+				.where(USER_AGE.with(ageMin, ageMax),
+						USER_AGE.with(ageMin, ageMax));
 	}
 }
