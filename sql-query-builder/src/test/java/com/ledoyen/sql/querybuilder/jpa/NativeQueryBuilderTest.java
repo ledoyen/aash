@@ -1,17 +1,49 @@
 package com.ledoyen.sql.querybuilder.jpa;
 
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
 import com.ledoyen.sql.querybuilder.UserClauses;
+import com.ledoyen.sql.querybuilder.jdbc.PreparedStatementBuilderTest;
 import com.ledoyen.tool.Dates;
 
 public class NativeQueryBuilderTest implements UserClauses {
+
+	private EntityManager entityManager;
+
+	@Before
+	public void setUp() {
+		String driver;
+		// Starting Derby in Network (multi JVM) mode:
+		driver = "org.h2.Driver";
+		
+		StringBuilder sb = new StringBuilder("jdbc:h2:mem:test");
+		sb.append(";INIT=runscript from '");
+		URL createFile = PreparedStatementBuilderTest.class.getClassLoader().getResource("create.sql");
+		sb.append(createFile.getFile().substring(1));
+		sb.append("'\\;runscript from '");
+		URL populateFile = PreparedStatementBuilderTest.class.getClassLoader().getResource("populate.sql");
+		sb.append(populateFile.getFile().substring(1));
+		sb.append("'");
+		
+		Properties emfProps = new Properties();
+		emfProps.setProperty("javax.persistence.jdbc.driver", driver);
+		emfProps.setProperty("javax.persistence.jdbc.url", sb.toString());
+		emfProps.setProperty("javax.persistence.jdbc.user", "sa");
+		emfProps.setProperty("javax.persistence.jdbc.password", "");
+		EntityManagerFactory emf = Persistence.createEntityManagerFactory("default", emfProps);
+		entityManager = emf.createEntityManager();
+	}
 
 	@Test
 	public void test() {
@@ -39,7 +71,7 @@ public class NativeQueryBuilderTest implements UserClauses {
 				.groupOrOrder("group by pv.var_name");
 
 		System.out.println(nqb.getQueryAsString());
-		List<?> results = nqb.query(getEntityManager()).getResultList();
+		List<?> results = nqb.query(entityManager).getResultList();
 		System.out.println(results);
 	}
 
@@ -51,10 +83,5 @@ public class NativeQueryBuilderTest implements UserClauses {
 				.select(INITIAL_SELECT)
 				.where(USER_AGE.with(ageMin, ageMax),
 						USER_AGE.with(ageMin, ageMax));
-	}
-
-	private EntityManager getEntityManager() {
-		// TODO stub the damned thing
-		return null;
 	}
 }

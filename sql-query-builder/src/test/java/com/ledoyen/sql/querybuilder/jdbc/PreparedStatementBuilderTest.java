@@ -1,11 +1,16 @@
 package com.ledoyen.sql.querybuilder.jdbc;
 
+import java.net.URL;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
@@ -15,6 +20,33 @@ import com.ledoyen.tool.Dates;
 public class PreparedStatementBuilderTest implements UserClauses {
 
 	private Connection connection;
+
+	@BeforeClass
+	public static void setUpClass() throws ClassNotFoundException {
+		Class.forName("org.h2.Driver");
+	}
+
+	@Before
+	public void setUp() throws SQLException {
+		StringBuilder sb = new StringBuilder("jdbc:h2:mem:test");
+		sb.append(";INIT=runscript from '");
+		
+		URL createFile = PreparedStatementBuilderTest.class.getClassLoader().getResource("create.sql");
+		sb.append(createFile.getFile().substring(1));
+		
+		sb.append("'\\;runscript from '");
+
+		URL populateFile = PreparedStatementBuilderTest.class.getClassLoader().getResource("populate.sql");
+		sb.append(populateFile.getFile().substring(1));
+
+		sb.append("'");
+		connection = DriverManager.getConnection(sb.toString(), "sa", "");
+	}
+
+	@After
+	public void tearDown() throws SQLException {
+		connection.close();
+	}
 
 	@Test
 	public void test() throws SQLException {
@@ -43,7 +75,9 @@ public class PreparedStatementBuilderTest implements UserClauses {
 
 		System.out.println(psb.getQueryAsString());
 		ResultSet results = psb.preparedStatement(connection).executeQuery();
-		System.out.println(results);
+		while(results.next()) {
+			System.out.println(results.getObject(1) + " " + results.getObject(2));
+		}
 	}
 
 	@Test(expected=IllegalArgumentException.class)

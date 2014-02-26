@@ -29,6 +29,6 @@ public interface UserClauses {
 	    "pv.var_name in (:variableNames) ", "variableNames");
     DoubleBindedWhereClauseBuilder CREATION_DATE = new DoubleBindedWhereClauseBuilder("u.creation_date between :startDate and :endDate", "startDate",
 	    "endDate");
-    SimpleBindedWhereClauseBuilder BUSINESS_UNIT_CODE = new SimpleBindedWhereClauseBuilder("bu.code = :codeCaisse", "codeCaisse");
-    SimpleBindedWhereClauseBuilder BUSINESS_UNIT_CATEGORY = new SimpleBindedWhereClauseBuilder("bu.category = :codeCatCaisse", "codeCatCaisse");
+    SimpleBindedWhereClauseBuilder BUSINESS_UNIT_CODE = new SimpleBindedWhereClauseBuilder("bu.code = :code", "code");
+    SimpleBindedWhereClauseBuilder BUSINESS_UNIT_CATEGORY = new SimpleBindedWhereClauseBuilder("bu.category = :category", "category");
 }
