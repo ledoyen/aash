@@ -60,11 +60,11 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 						PROFILE_VALUE_SCORE_MIN.with(scoreMin, scoreMinInclusive),
 						PROFILE_VALUE_SCORE_MAX.with(scoreMax, scoreMaxInclusive),
 						"M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR,
-						PROFILE_VALUE_VARIABLE_NAMES.with(variableNames),
+						PROFILE_VALUE_VARIABLE_NAMES.with(names),
 						CREATION_DATE.with(Dates.floor(startDate),
 								Dates.ceiling(endDate != null ? endDate : startDate)),
 						BUSINESS_UNIT_CODE.with(code))
-				.groupOrOrder("group by pv.var_name");
+				.groupOrOrder("group by s.name");
 
 		System.out.println(nqb.getQueryAsString());
 		List<?> results = nqb.query(entityManager).getResultList();
@@ -84,15 +84,15 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 	@Test
 	public void testClassicWay() {
 		StringBuilder request = new StringBuilder(UserClauses.INITIAL_SELECT);
-		request.append(" where (c.id = u.civility_id) and (pv.user_id = u.id) ");
-		request.append(" and u.business_id = bu.id ");
-		request.append(" and (pv.is_histo is false) ");
+		request.append(" where (c.id = u.civility_id) and (s.user_id = u.id) ");
+		request.append(" and u.region_id = r.id ");
+		request.append(" and (s.is_histo is false) ");
 
 		if(ageMin != null && ageMax!=null) {
 			request.append(" and timestampdiff(YEAR, u.birth_date, sysdate()) between :ageMin and :ageMax ");
 		}
 		if(scoreMin != null) {
-			request.append(" and pv.double_value ");
+			request.append(" and s.score ");
 			if (scoreMinInclusive) {
 				request.append(">=");
 			} else {
@@ -101,7 +101,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 			request.append(" :scoreMin ");
 		}
 		if(scoreMax != null) {
-			request.append(" and pv.double_value ");
+			request.append(" and s.score ");
 			if (scoreMaxInclusive) {
 				request.append("<=");
 			} else {
@@ -114,19 +114,19 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 		} else {
 			request.append(" and c.name != 'M.' ");
 		}
-		if (variableNames != null && !variableNames.isEmpty()) {
-			request.append("and pv.var_name in (:variableNames) ");
+		if (names != null && !names.isEmpty()) {
+			request.append("and s.name in (:names) ");
 		}
 		if (startDate != null) {
 			request.append(" and u.creation_date between :startDate and :endDate ");
 		}
 		if (code != null) {
-			request.append(" and bu.code = :code ");
+			request.append(" and r.code = :code ");
 		}
 		if (category != null) {
-			request.append(" and bu.category = :category ");
+			request.append(" and r.category = :category ");
 		}
-		request.append(" group by pv.var_name");
+		request.append(" group by s.name");
 		
 		Query query = entityManager.createNativeQuery(request.toString());
 		if(ageMin != null && ageMax!=null) {
@@ -138,8 +138,8 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 		if(scoreMax != null) {
 			query.setParameter("scoreMax", scoreMax);
 		}
-		if (variableNames != null && !variableNames.isEmpty()) {
-			query.setParameter("variableNames", variableNames);
+		if (names != null && !names.isEmpty()) {
+			query.setParameter("names", names);
 		}
 		if (startDate != null) {
 		    query.setParameter("startDate", Dates.floor(startDate));

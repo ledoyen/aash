@@ -20,7 +20,7 @@ public abstract class AbstractTest {
 	protected boolean scoreMinInclusive;
 	protected boolean scoreMaxInclusive;
 	protected String civility;
-	protected List<String> variableNames;
+	protected List<String> names;
 	protected Date startDate;
 	protected Date endDate;
 	protected String code;
@@ -28,7 +28,7 @@ public abstract class AbstractTest {
 
 	public AbstractTest(Integer ageMin, Integer ageMax, Double scoreMin, Double scoreMax,
 			boolean scoreMinInclusive, boolean scoreMaxInclusive, String civility,
-			List<String> variableNames, Date startDate, Date endDate, String code, String category) {
+			List<String> names, Date startDate, Date endDate, String code, String category) {
 		this.ageMin = ageMin;
 		this.ageMax = ageMax;
 		this.scoreMin = scoreMin;
@@ -36,7 +36,7 @@ public abstract class AbstractTest {
 		this.scoreMinInclusive = scoreMinInclusive;
 		this.scoreMaxInclusive = scoreMaxInclusive;
 		this.civility = civility;
-		this.variableNames = variableNames;
+		this.names = names;
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.code = code;

@@ -52,12 +52,12 @@ public class PreparedStatementBuilderTest extends AbstractTest implements UserCl
 						PROFILE_VALUE_SCORE_MIN.with(scoreMin, scoreMinInclusive),
 						PROFILE_VALUE_SCORE_MAX.with(scoreMax, scoreMaxInclusive),
 						"M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR,
-						PROFILE_VALUE_VARIABLE_NAMES.with(variableNames),
+						PROFILE_VALUE_VARIABLE_NAMES.with(names),
 						CREATION_DATE.with(Dates.floor(startDate),
 								Dates.ceiling(endDate != null ? endDate : startDate)),
 						BUSINESS_UNIT_CODE.with(code),
 						BUSINESS_UNIT_CATEGORY.with(category))
-				.groupOrOrder("group by pv.var_name");
+				.groupOrOrder("group by s.name");
 
 		System.out.println(psb.getQueryAsString());
 		ResultSet results = psb.preparedStatement(connection).executeQuery();
