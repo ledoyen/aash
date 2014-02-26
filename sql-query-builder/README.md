@@ -8,17 +8,19 @@ Assuming the definition of a library of clauses, your DAO code will look like :
 NativeQueryBuilder nqb = NativeQueryBuilder
 	.select(INITIAL_SELECT)
 	.where(JOIN_USER_CIVILITY,
-			JOIN_USER_PROFILE_VALUE,
-			JOIN_USER_BUSINESS_UNIT,
-			PROVILE_VALUE_HISTO.with(false),
+			JOIN_USER_SCORE,
+			JOIN_USER_REGION,
+			SCORE_HISTO.with(false),
 			USER_AGE.with(ageMin, ageMax),
-			PROFILE_VALUE_SCORE_MIN.with(scoreMin, scoreMinInclusive),
-			PROFILE_VALUE_SCORE_MAX.with(scoreMax, scoreMaxInclusive),
+			SCORE_MIN.with(scoreMin, scoreMinInclusive),
+			SCORE_MAX.with(scoreMax, scoreMaxInclusive),
 			"M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR,
-			PROFILE_VALUE_VARIABLE_NAMES.with(variableNames),
-			CREATION_DATE.with(Dates.floor(startDate), Dates.ceiling(endDate != null ? endDate : startDate)),
-			BUSINESS_UNIT_CODE.with(code))
-	.groupOrOrder("group by pv.var_name");
+			SCORE_NAMES.with(names),
+			CREATION_DATE.with(Dates.floor(startDate),
+					Dates.ceiling(endDate != null ? endDate : startDate)),
+			REGION_CODE.with(code),
+			REGION_CATEGORY.with(category))
+	.groupOrOrder("group by s.name");
 
 List<?> results = nqb.query(getEntityManager()).getResultList();
 ```
@@ -26,15 +28,15 @@ List<?> results = nqb.query(getEntityManager()).getResultList();
 Depending on the type of clause, you will benefit from implicit parameter check :
 
 ```java
-if(variableNames != null && !variableNames.isEmpty()) {
-	sql.append(" and pv.variable_name in (:variableNames) ");
+if(names != null && !names.isEmpty()) {
+	sql.append(" and s.name in (:names) ");
 }
 ...
-if(variableNames != null && !variableNames.isEmpty()) {
-	query.setParameter("variableNames", variableNames);
+if(names != null && !names.isEmpty()) {
+	query.setParameter("names", names);
 }
 ```
 is done by the equivalent clause :
 ```java
-PROFILE_VALUE_VARIABLE_NAMES.with(variableNames)
+SCORE_NAMES.with(names)
 ```

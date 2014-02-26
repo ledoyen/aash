@@ -45,18 +45,18 @@ public class PreparedStatementBuilderTest extends AbstractTest implements UserCl
 		PreparedStatementBuilder psb = PreparedStatementBuilder
 				.select(INITIAL_SELECT)
 				.where(JOIN_USER_CIVILITY,
-						JOIN_USER_PROFILE_VALUE,
-						JOIN_USER_BUSINESS_UNIT,
-						PROVILE_VALUE_HISTO.with(false),
+						JOIN_USER_SCORE,
+						JOIN_USER_REGION,
+						SCORE_HISTO.with(false),
 						USER_AGE.with(ageMin, ageMax),
-						PROFILE_VALUE_SCORE_MIN.with(scoreMin, scoreMinInclusive),
-						PROFILE_VALUE_SCORE_MAX.with(scoreMax, scoreMaxInclusive),
+						SCORE_MIN.with(scoreMin, scoreMinInclusive),
+						SCORE_MAX.with(scoreMax, scoreMaxInclusive),
 						"M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR,
-						PROFILE_VALUE_VARIABLE_NAMES.with(names),
+						SCORE_NAMES.with(names),
 						CREATION_DATE.with(Dates.floor(startDate),
 								Dates.ceiling(endDate != null ? endDate : startDate)),
-						BUSINESS_UNIT_CODE.with(code),
-						BUSINESS_UNIT_CATEGORY.with(category))
+						REGION_CODE.with(code),
+						REGION_CATEGORY.with(category))
 				.groupOrOrder("group by s.name");
 
 		System.out.println(psb.getQueryAsString());
