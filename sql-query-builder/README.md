@@ -18,7 +18,7 @@ NativeQueryBuilder nqb = NativeQueryBuilder
 			PROFILE_VALUE_VARIABLE_NAMES.with(variableNames),
 			CREATION_DATE.with(Dates.floor(startDate), Dates.ceiling(endDate != null ? endDate : startDate)),
 			BUSINESS_UNIT_CODE.with(code))
-	.groupOrOrder("group by sp.var_name");
+	.groupOrOrder("group by pv.var_name");
 
 List<?> results = nqb.query(getEntityManager()).getResultList();
 ```

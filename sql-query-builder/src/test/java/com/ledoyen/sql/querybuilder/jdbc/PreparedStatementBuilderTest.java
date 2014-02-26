@@ -39,7 +39,7 @@ public class PreparedStatementBuilderTest implements UserClauses {
 						CREATION_DATE.with(Dates.floor(startDate),
 								Dates.ceiling(endDate != null ? endDate : startDate)),
 						BUSINESS_UNIT_CODE.with(code))
-				.groupOrOrder("group by sp.var_name");
+				.groupOrOrder("group by pv.var_name");
 
 		System.out.println(nqb.getQueryAsString());
 		ResultSet results = nqb.preparedStatement(connection).executeQuery();
