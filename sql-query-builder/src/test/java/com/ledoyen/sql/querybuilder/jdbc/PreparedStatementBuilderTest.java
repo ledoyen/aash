@@ -1,6 +1,5 @@
 package com.ledoyen.sql.querybuilder.jdbc;
 
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -8,55 +7,41 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import com.google.common.collect.Lists;
+import com.ledoyen.sql.querybuilder.AbstractTest;
 import com.ledoyen.sql.querybuilder.UserClauses;
 import com.ledoyen.tool.Dates;
 
-public class PreparedStatementBuilderTest implements UserClauses {
+@RunWith(Parameterized.class)
+public class PreparedStatementBuilderTest extends AbstractTest implements UserClauses {
 
-	private Connection connection;
+	private static Connection connection;
 
 	@BeforeClass
-	public static void setUpClass() throws ClassNotFoundException {
-		Class.forName("org.h2.Driver");
+	public static void setUpClass() throws ClassNotFoundException, SQLException {
+		Class.forName(getDbDriver());
+		connection = DriverManager.getConnection(getDbUrl(), "sa", "");
 	}
 
-	@Before
-	public void setUp() throws SQLException {
-		StringBuilder sb = new StringBuilder("jdbc:h2:mem:test");
-		sb.append(";INIT=runscript from '");
-		
-		URL createFile = PreparedStatementBuilderTest.class.getClassLoader().getResource("create.sql");
-		sb.append(createFile.getFile().substring(1));
-		
-		sb.append("'\\;runscript from '");
-
-		URL populateFile = PreparedStatementBuilderTest.class.getClassLoader().getResource("populate.sql");
-		sb.append(populateFile.getFile().substring(1));
-
-		sb.append("'");
-		connection = DriverManager.getConnection(sb.toString(), "sa", "");
+	public PreparedStatementBuilderTest(Integer ageMin, Integer ageMax, Double scoreMin, Double scoreMax,
+			boolean scoreMinInclusive, boolean scoreMaxInclusive, String civility,
+			List<String> variableNames, Date startDate, Date endDate, String code, String category) {
+		super(ageMin, ageMax, scoreMin, scoreMax, scoreMinInclusive, scoreMaxInclusive, civility,
+				variableNames, startDate, endDate, code, category);
 	}
 
-	@After
-	public void tearDown() throws SQLException {
+	@AfterClass
+	public static void tearDownClass() throws SQLException {
 		connection.close();
 	}
 
 	@Test
-	public void test() throws SQLException {
-		Integer ageMin = 7, ageMax = 77;
-		Double scoreMin = 0d, scoreMax = null;
-		boolean scoreMinInclusive = true, scoreMaxInclusive = true;
-		String civility = "M.", code = null;
-		Date startDate = new Date(), endDate = null;
-		List<String> variableNames = Lists.newArrayList("toto");
-
+	public void testPreparedStatementBuilder() throws SQLException {
 		PreparedStatementBuilder psb = PreparedStatementBuilder
 				.select(INITIAL_SELECT)
 				.where(JOIN_USER_CIVILITY,
@@ -70,7 +55,8 @@ public class PreparedStatementBuilderTest implements UserClauses {
 						PROFILE_VALUE_VARIABLE_NAMES.with(variableNames),
 						CREATION_DATE.with(Dates.floor(startDate),
 								Dates.ceiling(endDate != null ? endDate : startDate)),
-						BUSINESS_UNIT_CODE.with(code))
+						BUSINESS_UNIT_CODE.with(code),
+						BUSINESS_UNIT_CATEGORY.with(category))
 				.groupOrOrder("group by pv.var_name");
 
 		System.out.println(psb.getQueryAsString());
