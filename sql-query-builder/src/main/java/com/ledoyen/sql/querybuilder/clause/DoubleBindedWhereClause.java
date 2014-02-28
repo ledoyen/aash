@@ -1,10 +1,12 @@
 package com.ledoyen.sql.querybuilder.clause;
 
 import java.util.Collection;
+import java.util.Date;
 
 import com.google.common.collect.Lists;
 import com.ledoyen.sql.querybuilder.AbstractQueryBuilder.QueryAdapter;
 import com.ledoyen.sql.querybuilder.WhereClause;
+import com.ledoyen.tool.Dates;
 
 public class DoubleBindedWhereClause implements WhereClause {
 
@@ -54,6 +56,16 @@ public class DoubleBindedWhereClause implements WhereClause {
 
 		public DoubleBindedWhereClause with(Object value, Object value2) {
 			return new DoubleBindedWhereClause(expression, bindingName, bindingName2, value, value2);
+		}
+
+		/**
+		 * Floor the startDate if not null.<br>
+		 * Ceil the endDate if not null, Ceil the startDate if the endDate is null and startDate is not.
+		 */
+		public DoubleBindedWhereClause withDateTruncate(Date startDate, Date endDate) {
+		    Date start = startDate != null?Dates.floor(startDate):null;
+		    Date end = endDate != null?Dates.ceiling(endDate): (startDate != null ? Dates.ceiling(startDate) : null);
+		    return with(start, end);
 		}
 	}
 }

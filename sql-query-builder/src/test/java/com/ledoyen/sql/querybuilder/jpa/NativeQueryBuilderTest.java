@@ -71,8 +71,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 						SCORE_MAX.with(scoreMax, scoreMaxInclusive),
 						"M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR,
 						SCORE_NAMES.with(names),
-						CREATION_DATE.with(Dates.floor(startDate),
-								Dates.ceiling(endDate != null ? endDate : startDate)),
+						CREATION_DATE.withDateTruncate(startDate, endDate),
 						REGION_CODE.with(code),
 						REGION_CATEGORY.with(category))
 				.groupOrOrder("group by s.name");
