@@ -63,9 +63,9 @@ public class DoubleBindedWhereClause implements WhereClause {
 		 * Ceil the endDate if not null, Ceil the startDate if the endDate is null and startDate is not.
 		 */
 		public DoubleBindedWhereClause withDateTruncate(Date startDate, Date endDate) {
-		    Date start = startDate != null?Dates.floor(startDate):null;
-		    Date end = endDate != null?Dates.ceiling(endDate): (startDate != null ? Dates.ceiling(startDate) : null);
-		    return with(start, end);
+			Date start = Dates.floor(startDate);
+			Date end = Dates.ceiling(endDate != null ? endDate : startDate);
+			return with(start, end);
 		}
 	}
 }
