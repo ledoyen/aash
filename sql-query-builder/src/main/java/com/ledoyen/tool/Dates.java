@@ -3,7 +3,9 @@ package com.ledoyen.tool;
 import java.util.Calendar;
 import java.util.Date;
 
-public class Dates {
+public final class Dates {
+
+	private Dates() {}
 
 	public static Date floor(Date date) {
 		if (date == null) {

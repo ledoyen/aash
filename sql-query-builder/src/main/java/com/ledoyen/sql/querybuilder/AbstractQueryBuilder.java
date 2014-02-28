@@ -50,7 +50,7 @@ public class AbstractQueryBuilder {
 	}
 
 	public String getQueryAsString() {
-		return Strings.nullToEmpty(select) + buildWhereClause(clauses) + Strings.nullToEmpty(groupOrOrderClause);
+		return (Strings.nullToEmpty(select) + buildWhereClause(clauses) + Strings.nullToEmpty(groupOrOrderClause)).trim();
 	}
 
 	private static String buildWhereClause(WhereClause[] clauses) {

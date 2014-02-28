@@ -5,7 +5,9 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-public class Lists2 {
+public final class Lists2 {
+
+	private Lists2() {}
 
 	public static <T> List<T> flatten(Collection<?> list) {
 		List<T> retVal = Lists.newArrayList();

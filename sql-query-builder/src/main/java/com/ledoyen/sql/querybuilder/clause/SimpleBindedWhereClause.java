@@ -3,6 +3,7 @@ package com.ledoyen.sql.querybuilder.clause;
 import java.util.Collection;
 import java.util.Map;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.ledoyen.sql.querybuilder.AbstractQueryBuilder.QueryAdapter;
 import com.ledoyen.sql.querybuilder.WhereClause;
@@ -104,6 +105,14 @@ public class SimpleBindedWhereClause implements WhereClause {
 			} else {
 				return new SimpleBindedWhereClause(expression, bindingName, value);
 			}
+		}
+
+		public SimpleBindedWhereClause withString(final String value) {
+			return new SimpleBindedWhereClause(expression, bindingName, value) {
+				public boolean isApplicable() {
+					return !Strings.isNullOrEmpty(value);
+				}
+			};
 		}
 	}
 }
