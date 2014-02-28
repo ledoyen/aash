@@ -40,34 +40,6 @@ public class SimpleBindedWhereClause implements WhereClause {
 		return Lists.newArrayList(bindingName);
 	}
 
-	public static class CollectionSimpleBindedWhereClause extends SimpleBindedWhereClause {
-
-		private boolean collection;
-
-		public CollectionSimpleBindedWhereClause(String expression, String bindingName,
-				Collection<?> value) {
-			super(expression, bindingName, value);
-			this.collection = true;
-		}
-
-		public CollectionSimpleBindedWhereClause(String expression, String bindingName,
-				Map<?, ?> value) {
-			super(expression, bindingName, value);
-			this.collection = false;
-		}
-
-		@Override
-		public boolean isApplicable() {
-			boolean applicable = getValue() != null;
-			if (applicable && collection) {
-				applicable &= !((Collection<?>) getValue()).isEmpty();
-			} else if (applicable && !collection) {
-				applicable &= !((Map<?, ?>) getValue()).isEmpty();
-			}
-			return applicable;
-		}
-	}
-
 	public static class CollectionSimpleBindedWhereClauseBuilder {
 		private String expression;
 		private String bindingName;
@@ -77,12 +49,20 @@ public class SimpleBindedWhereClause implements WhereClause {
 			this.bindingName = bindingName;
 		}
 
-		public CollectionSimpleBindedWhereClause with(Collection<?> value) {
-			return new CollectionSimpleBindedWhereClause(expression, bindingName, value);
+		public SimpleBindedWhereClause with(final Collection<?> value) {
+			return new SimpleBindedWhereClause(expression, bindingName, value) {
+				public boolean isApplicable() {
+					return value != null && !value.isEmpty();
+				}
+			};
 		}
 
-		public CollectionSimpleBindedWhereClause with(Map<?, ?> value) {
-			return new CollectionSimpleBindedWhereClause(expression, bindingName, value);
+		public SimpleBindedWhereClause with(final Map<?, ?> value) {
+			return new SimpleBindedWhereClause(expression, bindingName, value) {
+				public boolean isApplicable() {
+					return value != null && !value.isEmpty();
+				}
+			};
 		}
 	}
 
@@ -97,11 +77,11 @@ public class SimpleBindedWhereClause implements WhereClause {
 
 		public SimpleBindedWhereClause with(Object value) {
 			if (value instanceof Collection) {
-				return new CollectionSimpleBindedWhereClause(expression, bindingName,
-						(Collection<?>) value);
+				return new CollectionSimpleBindedWhereClauseBuilder(expression, bindingName)
+						.with((Collection<?>) value);
 			} else if (value instanceof Map) {
-				return new CollectionSimpleBindedWhereClause(expression, bindingName,
-						(Map<?, ?>) value);
+				return new CollectionSimpleBindedWhereClauseBuilder(expression, bindingName)
+						.with((Map<?, ?>) value);
 			} else {
 				return new SimpleBindedWhereClause(expression, bindingName, value);
 			}
