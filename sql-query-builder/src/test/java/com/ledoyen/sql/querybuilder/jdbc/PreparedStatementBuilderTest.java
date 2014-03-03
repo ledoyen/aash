@@ -56,7 +56,7 @@ public class PreparedStatementBuilderTest extends AbstractTest implements UserCl
 						SCORE_NAMES.with(names),
 						CREATION_DATE.betweenDates(startDate, endDate),
 						REGION_CODE.with(code),
-						REGION_CATEGORY.with(category))
+						REGION_CATEGORY.withString(category))
 				.groupOrOrder("group by s.name");
 
 		System.out.println(psb.getQueryAsString());

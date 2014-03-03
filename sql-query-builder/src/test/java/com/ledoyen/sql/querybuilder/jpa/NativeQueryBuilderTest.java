@@ -75,7 +75,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 						SCORE_NAMES.with(names),
 						CREATION_DATE.betweenDates(startDate, endDate),
 						REGION_CODE.with(code),
-						REGION_CATEGORY.with(category))
+						REGION_CATEGORY.withString(category))
 				.groupOrOrder("group by s.name");
 
 		System.out.println(nqb.getQueryAsString());
@@ -125,7 +125,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 		if (code != null) {
 			request.append(" and r.code = :code ");
 		}
-		if (category != null) {
+		if (category != null && category.length() > 0) {
 			request.append(" and r.category = :category ");
 		}
 		request.append(" group by s.name");
@@ -150,7 +150,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 		if (code != null) {
 		    query.setParameter("code", code);
 		}
-		if (category != null) {
+		if (category != null && category.length() > 0) {
 		    query.setParameter("category", category);
 		}
 		
