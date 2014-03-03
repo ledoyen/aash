@@ -57,7 +57,9 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 		NativeQueryBuilder
 				.select(INITIAL_SELECT)
 				.where(USER_AGE.with(ageMin, ageMax),
-						USER_AGE.with(ageMin, ageMax));
+						USER_AGE.with(ageMin, ageMax),
+						SCORE_HISTO.with(null),
+						SCORE_HISTO.with(new Object[]{null}));
 	}
 
 	@Test

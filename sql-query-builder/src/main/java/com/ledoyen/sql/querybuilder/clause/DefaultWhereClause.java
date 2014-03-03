@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import com.ledoyen.sql.querybuilder.AbstractQueryBuilder.QueryAdapter;
 import com.ledoyen.sql.querybuilder.WhereClause;
+import com.ledoyen.tool.Arrays2;
 
 public class DefaultWhereClause implements WhereClause {
 
@@ -38,8 +39,12 @@ public class DefaultWhereClause implements WhereClause {
 			this.expresssion = expresssion;
 		}
 
-		public DefaultWhereClause with(Object... value) {
-			return new DefaultWhereClause(String.format(expresssion, value));
+		public DefaultWhereClause with(final Object... value) {
+			return new DefaultWhereClause(String.format(expresssion, value)) {
+				public boolean isApplicable() {
+					return super.isApplicable() && value != null && !Arrays2.contains(value, null);
+				}
+			};
 		}
 	}
 }

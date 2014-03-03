@@ -52,7 +52,7 @@ public class SimpleBindedWhereClause implements WhereClause {
 		public SimpleBindedWhereClause with(final Collection<?> value) {
 			return new SimpleBindedWhereClause(expression, bindingName, value) {
 				public boolean isApplicable() {
-					return value != null && !value.isEmpty();
+					return super.isApplicable() && !value.isEmpty();
 				}
 			};
 		}
@@ -60,7 +60,7 @@ public class SimpleBindedWhereClause implements WhereClause {
 		public SimpleBindedWhereClause with(final Map<?, ?> value) {
 			return new SimpleBindedWhereClause(expression, bindingName, value) {
 				public boolean isApplicable() {
-					return value != null && !value.isEmpty();
+					return super.isApplicable() && !value.isEmpty();
 				}
 			};
 		}
@@ -90,7 +90,7 @@ public class SimpleBindedWhereClause implements WhereClause {
 		public SimpleBindedWhereClause withString(final String value) {
 			return new SimpleBindedWhereClause(expression, bindingName, value) {
 				public boolean isApplicable() {
-					return !Strings.isNullOrEmpty(value);
+					return super.isApplicable() && !Strings.isNullOrEmpty(value);
 				}
 			};
 		}
