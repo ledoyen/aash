@@ -1,4 +1,4 @@
-package com.ledoyen.sql.querybuilder.jdbc;
+package com.ledoyen.sql.querybuilder;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
-import com.ledoyen.sql.querybuilder.AbstractQueryBuilder;
-import com.ledoyen.sql.querybuilder.WhereClause;
-import com.ledoyen.sql.querybuilder.WhereClauses;
 
 public final class PreparedStatementBuilder extends AbstractQueryBuilder {
 

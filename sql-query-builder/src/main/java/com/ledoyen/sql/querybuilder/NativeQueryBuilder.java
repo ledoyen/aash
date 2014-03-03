@@ -1,10 +1,7 @@
-package com.ledoyen.sql.querybuilder.jpa;
+package com.ledoyen.sql.querybuilder;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-
-import com.ledoyen.sql.querybuilder.AbstractQueryBuilder;
-import com.ledoyen.sql.querybuilder.WhereClause;
 
 public final class NativeQueryBuilder extends AbstractQueryBuilder {
 

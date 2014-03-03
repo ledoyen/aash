@@ -31,10 +31,10 @@ public class DefaultWhereClause implements WhereClause {
 		return Collections.EMPTY_SET;
 	}
 
-	public static class FormattedDefaultWhereClauseBinder {
+	public static class FormattedDefaultWhereClauseBuilder {
 		private String expresssion;
 
-		public FormattedDefaultWhereClauseBinder(String expresssion) {
+		public FormattedDefaultWhereClauseBuilder(String expresssion) {
 			this.expresssion = expresssion;
 		}
 

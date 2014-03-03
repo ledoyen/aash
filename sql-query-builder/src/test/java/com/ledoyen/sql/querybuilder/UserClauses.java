@@ -1,7 +1,7 @@
 package com.ledoyen.sql.querybuilder;
 
 import com.ledoyen.sql.querybuilder.clause.DefaultWhereClause;
-import com.ledoyen.sql.querybuilder.clause.DefaultWhereClause.FormattedDefaultWhereClauseBinder;
+import com.ledoyen.sql.querybuilder.clause.DefaultWhereClause.FormattedDefaultWhereClauseBuilder;
 import com.ledoyen.sql.querybuilder.clause.DoubleBindedWhereClause.DoubleBindedWhereClauseBuilder;
 import com.ledoyen.sql.querybuilder.clause.OperatorSimpleBindedWhereClauseBuilder;
 import com.ledoyen.sql.querybuilder.clause.OperatorSimpleBindedWhereClauseBuilder.Operator;
@@ -16,7 +16,7 @@ public interface UserClauses {
 	DefaultWhereClause JOIN_USER_CIVILITY = new DefaultWhereClause("c.id = u.civility_id");
     DefaultWhereClause JOIN_USER_SCORE = new DefaultWhereClause("s.user_id = u.id");
     DefaultWhereClause JOIN_USER_REGION = new DefaultWhereClause("u.region_id = r.id");
-    FormattedDefaultWhereClauseBinder SCORE_HISTO = new FormattedDefaultWhereClauseBinder("s.is_histo is %s");
+    FormattedDefaultWhereClauseBuilder SCORE_HISTO = new FormattedDefaultWhereClauseBuilder("s.is_histo is %s");
     DoubleBindedWhereClauseBuilder USER_AGE = new DoubleBindedWhereClauseBuilder(
 	    "timestampdiff(YEAR, u.birth_date, sysdate()) between :ageMin and :ageMax", "ageMin", "ageMax");
     OperatorSimpleBindedWhereClauseBuilder SCORE_MIN = new OperatorSimpleBindedWhereClauseBuilder("s.score %s :scoreMin",

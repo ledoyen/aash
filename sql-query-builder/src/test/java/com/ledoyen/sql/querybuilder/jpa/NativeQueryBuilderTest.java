@@ -17,7 +17,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import com.ledoyen.sql.querybuilder.AbstractTest;
+import com.ledoyen.sql.querybuilder.NativeQueryBuilder;
 import com.ledoyen.sql.querybuilder.UserClauses;
+import com.ledoyen.sql.querybuilder.WhereClauses;
 import com.ledoyen.tool.Dates;
 
 @RunWith(Parameterized.class)
@@ -69,7 +71,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 						USER_AGE.with(ageMin, ageMax),
 						SCORE_MIN.with(scoreMin, scoreMinInclusive),
 						SCORE_MAX.with(scoreMax, scoreMaxInclusive),
-						"M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR,
+						WhereClauses.ifTrue(civility != null, "M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR),
 						SCORE_NAMES.with(names),
 						CREATION_DATE.withDateTruncate(startDate, endDate),
 						REGION_CODE.with(code),
