@@ -52,7 +52,7 @@ public class PreparedStatementBuilderTest extends AbstractTest implements UserCl
 						USER_AGE.with(ageMin, ageMax),
 						SCORE_MIN.with(scoreMin, scoreMinInclusive),
 						SCORE_MAX.with(scoreMax, scoreMaxInclusive),
-						WhereClauses.ifTrue(civility != null, "M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR),
+						WhereClauses.conditional(civility != null, "M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR),
 						SCORE_NAMES.with(names),
 						CREATION_DATE.betweenDates(startDate, endDate),
 						REGION_CODE.with(code),

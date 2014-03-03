@@ -19,7 +19,7 @@ public final class WhereClauses {
 				new WhereClause.GetParameterNames()));
 	}
 
-	public static WhereClause ifTrue(boolean condition, WhereClause clause) {
+	public static WhereClause conditional(boolean condition, WhereClause clause) {
 		if (condition) {
 			return clause;
 		} else {
