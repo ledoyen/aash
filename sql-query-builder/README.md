@@ -1,6 +1,6 @@
 # SQL-Query-Builder
 
-A tool to help you compose native sql queries and make DAO code more readable.
+SQL-Query-Builder is a tool to help you compose native sql queries and make DAO code more readable.
 
 Assuming the definition of a library of clauses, your DAO code will look like :
 
