@@ -43,7 +43,7 @@ PreparedStatementBuilder psb = PreparedStatementBuilder
 PreparedStatement preparedStatement = psb.preparedStatement(getConnection());
 ResultSet results = preparedStatement.executeQuery();
 ```
-*As __PreparedStatement__ does not support named parameters and __CallableStatement__ are not supported by all SGBD, a conversion is made from names to positions.* 
+*As __PreparedStatement__ does not support named parameters and __CallableStatement__ is not supported by all SGBD, a conversion is made from names to positions.* 
 
 ## Clauses
 Each clause type or builder is designed to fit most needs, and can be extended for exotic specifications.
