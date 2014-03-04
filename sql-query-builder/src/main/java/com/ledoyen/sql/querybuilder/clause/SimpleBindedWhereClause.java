@@ -40,32 +40,6 @@ public class SimpleBindedWhereClause implements WhereClause {
 		return Lists.newArrayList(bindingName);
 	}
 
-	public static class CollectionSimpleBindedWhereClauseBuilder {
-		private String expression;
-		private String bindingName;
-
-		public CollectionSimpleBindedWhereClauseBuilder(String expression, String bindingName) {
-			this.expression = expression;
-			this.bindingName = bindingName;
-		}
-
-		public SimpleBindedWhereClause with(final Collection<?> value) {
-			return new SimpleBindedWhereClause(expression, bindingName, value) {
-				public boolean isApplicable() {
-					return super.isApplicable() && !value.isEmpty();
-				}
-			};
-		}
-
-		public SimpleBindedWhereClause with(final Map<?, ?> value) {
-			return new SimpleBindedWhereClause(expression, bindingName, value) {
-				public boolean isApplicable() {
-					return super.isApplicable() && !value.isEmpty();
-				}
-			};
-		}
-	}
-
 	public static class SimpleBindedWhereClauseBuilder {
 		private String expression;
 		private String bindingName;
@@ -76,21 +50,29 @@ public class SimpleBindedWhereClause implements WhereClause {
 		}
 
 		public SimpleBindedWhereClause with(Object value) {
-			if (value instanceof Collection) {
-				return new CollectionSimpleBindedWhereClauseBuilder(expression, bindingName)
-						.with((Collection<?>) value);
-			} else if (value instanceof Map) {
-				return new CollectionSimpleBindedWhereClauseBuilder(expression, bindingName)
-						.with((Map<?, ?>) value);
-			} else {
-				return new SimpleBindedWhereClause(expression, bindingName, value);
-			}
+			return new SimpleBindedWhereClause(expression, bindingName, value);
 		}
 
-		public SimpleBindedWhereClause withString(final String value) {
+		public SimpleBindedWhereClause with(final String value) {
 			return new SimpleBindedWhereClause(expression, bindingName, value) {
 				public boolean isApplicable() {
 					return super.isApplicable() && !Strings.isNullOrEmpty(value);
+				}
+			};
+		}
+
+		public SimpleBindedWhereClause with(final Collection<?> value) {
+			return new SimpleBindedWhereClause(expression, bindingName, value) {
+				public boolean isApplicable() {
+					return super.isApplicable() && !value.isEmpty();
+				}
+			};
+		}
+
+		public SimpleBindedWhereClause with(final Map<?,?> value) {
+			return new SimpleBindedWhereClause(expression, bindingName, value) {
+				public boolean isApplicable() {
+					return super.isApplicable() && !value.isEmpty();
 				}
 			};
 		}

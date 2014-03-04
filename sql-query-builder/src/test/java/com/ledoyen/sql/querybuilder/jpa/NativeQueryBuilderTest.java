@@ -77,7 +77,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 						SCORE_NAMES.with(names),
 						CREATION_DATE.betweenDates(startDate, endDate),
 						REGION_CODE.with(code),
-						REGION_CATEGORY.withString(category))
+						REGION_CATEGORY.with(category))
 				.groupOrOrder("group by s.name");
 
 		System.out.println(nqb.getQueryAsString());

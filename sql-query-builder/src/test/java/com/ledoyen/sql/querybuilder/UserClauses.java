@@ -5,7 +5,6 @@ import com.ledoyen.sql.querybuilder.clause.DefaultWhereClause.FormattedDefaultWh
 import com.ledoyen.sql.querybuilder.clause.DoubleBindedWhereClause.DoubleBindedWhereClauseBuilder;
 import com.ledoyen.sql.querybuilder.clause.OperatorSimpleBindedWhereClauseBuilder;
 import com.ledoyen.sql.querybuilder.clause.OperatorSimpleBindedWhereClauseBuilder.Operator;
-import com.ledoyen.sql.querybuilder.clause.SimpleBindedWhereClause.CollectionSimpleBindedWhereClauseBuilder;
 import com.ledoyen.sql.querybuilder.clause.SimpleBindedWhereClause.SimpleBindedWhereClauseBuilder;
 
 public interface UserClauses {
@@ -25,7 +24,7 @@ public interface UserClauses {
 	    "scoreMax", Operator.LESS);
     DefaultWhereClause CIVILITY_MR = new DefaultWhereClause("c.name = 'M.'");
     DefaultWhereClause CIVILITY_NOT_MR = new DefaultWhereClause("c.name != 'M.'");
-    CollectionSimpleBindedWhereClauseBuilder SCORE_NAMES = new CollectionSimpleBindedWhereClauseBuilder(
+    SimpleBindedWhereClauseBuilder SCORE_NAMES = new SimpleBindedWhereClauseBuilder(
 	    "s.name in (:names) ", "names");
     DoubleBindedWhereClauseBuilder CREATION_DATE = new DoubleBindedWhereClauseBuilder("u.creation_date between :startDate and :endDate", "startDate",
 	    "endDate");
