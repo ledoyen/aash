@@ -1,5 +1,6 @@
 package com.ledoyen.sql.querybuilder;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -54,16 +55,16 @@ public class AbstractQueryBuilder {
 	}
 
 	private static String buildWhereClause(WhereClause[] clauses) {
-		final String whereClause;
-		if (clauses != null && clauses.length > 0) {
-			whereClause = " where "
-					+ Joiner.on(" and ").join(
-							Collections2.transform(Collections2.filter(
-									Lists.newArrayList(clauses),
-									new WhereClause.IsApplicableFilter()),
-									new WhereClause.GetExpression())) + " ";
-		} else {
-			whereClause = " ";
+		String whereClause = "";
+		if (clauses != null) {
+			Collection<WhereClause> filteredClauses = Collections2.filter(
+					Lists.newArrayList(clauses), new WhereClause.IsApplicableFilter());
+			if (filteredClauses.size() > 0) {
+				whereClause = " where "
+						+ Joiner.on(" and ").join(
+								Collections2.transform(filteredClauses,
+										new WhereClause.GetExpression())) + " ";
+			}
 		}
 		return whereClause;
 	}

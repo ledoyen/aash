@@ -1,5 +1,7 @@
 package com.ledoyen.sql.querybuilder.jpa;
 
+import static org.junit.Assert.assertThat;
+
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +12,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -60,6 +63,15 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 						USER_AGE.with(ageMin, ageMax),
 						SCORE_HISTO.with(null),
 						SCORE_HISTO.with(new Object[]{null}));
+	}
+
+	@Test
+	public void whereWordNotPresentIfNoneMatchs() {
+		NativeQueryBuilder nqb = NativeQueryBuilder
+				.select(INITIAL_SELECT)
+				.where(USER_AGE.with(null, null),
+						REGION_CODE.with((String) null));
+		assertThat(nqb.getQueryAsString(), CoreMatchers.not(CoreMatchers.containsString("where")));
 	}
 
 	@Test
@@ -159,4 +171,6 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 		List<?> results = query.getResultList();
 		System.out.println(results);
 	}
+
+	// TODO test equivalent with querydsl
 }
