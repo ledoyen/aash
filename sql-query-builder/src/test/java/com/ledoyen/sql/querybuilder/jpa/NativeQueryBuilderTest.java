@@ -32,18 +32,15 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 
 	@BeforeClass
 	public static void setUpClass() {
-		Properties emfProps = new Properties();
-		emfProps.setProperty("javax.persistence.jdbc.driver", getDbDriver());
-		emfProps.setProperty("javax.persistence.jdbc.url", getDbUrl());
-		emfProps.setProperty("javax.persistence.jdbc.user", "sa");
-		emfProps.setProperty("javax.persistence.jdbc.password", "");
-		EntityManagerFactory emf = Persistence.createEntityManagerFactory("default", emfProps);
+		EntityManagerFactory emf = Persistence.createEntityManagerFactory("default", new Properties());
 		entityManager = emf.createEntityManager();
 	}
 
 	@AfterClass
 	public static void tearDownClass() throws SQLException {
-		entityManager.close();
+		if(entityManager != null) {
+			entityManager.close();
+		}
 	}
 
 	public NativeQueryBuilderTest(Integer ageMin, Integer ageMax, Double scoreMin, Double scoreMax,

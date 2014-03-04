@@ -1,6 +1,5 @@
 package com.ledoyen.sql.querybuilder;
 
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -9,7 +8,6 @@ import java.util.List;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.google.common.collect.Lists;
-import com.ledoyen.sql.querybuilder.jdbc.PreparedStatementBuilderTest;
 
 public abstract class AbstractTest {
 
@@ -49,21 +47,5 @@ public abstract class AbstractTest {
 	    		new Object[] { null, null, null, null, true, true, null, null, null, null, null, null},
 	            new Object[] { 7, 77, 0d, null, true, true, "M.", Lists.newArrayList("toto", "titi"), new Date(), null, null, null}
 	            );
-	}
-
-	protected static String getDbDriver() {
-		return "org.h2.Driver";
-	}
-
-	protected static String getDbUrl() {
-		StringBuilder sb = new StringBuilder("jdbc:h2:mem:test");
-		sb.append(";INIT=runscript from '");
-		URL createFile = PreparedStatementBuilderTest.class.getClassLoader().getResource("create.sql");
-		sb.append(createFile.getFile().substring(1));
-		sb.append("'\\;runscript from '");
-		URL populateFile = PreparedStatementBuilderTest.class.getClassLoader().getResource("populate.sql");
-		sb.append(populateFile.getFile().substring(1));
-		sb.append("'");
-		return sb.toString();
 	}
 }
