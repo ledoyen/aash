@@ -1,12 +1,17 @@
 package com.ledoyen.sql.querybuilder.jdbc;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
+import org.hibernate.ejb.EntityManagerFactoryImpl;
+import org.hibernate.engine.jdbc.internal.JdbcServicesImpl;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,8 +30,9 @@ public class PreparedStatementBuilderTest extends AbstractTest implements UserCl
 
 	@BeforeClass
 	public static void setUpClass() throws ClassNotFoundException, SQLException {
-		Class.forName(getDbDriver());
-		connection = DriverManager.getConnection(getDbUrl(), "sa", "");
+		EntityManagerFactory emf = Persistence.createEntityManagerFactory("default", new Properties());
+		JdbcServicesImpl c = (JdbcServicesImpl) ((EntityManagerFactoryImpl)emf).getSessionFactory().getJdbcServices();
+		connection = c.getConnectionProvider().getConnection();
 	}
 
 	public PreparedStatementBuilderTest(Integer ageMin, Integer ageMax, Double scoreMin, Double scoreMax,
