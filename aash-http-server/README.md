@@ -19,7 +19,7 @@ To make the server fits your needs, it offers to bind paths to controllers.
 What we call controllers, are in fact functions transforming an `com.ledoyen.scala.httpserver.HttpRequest` into an `com.ledoyen.scala.httpserver.Httpresponse`.
 
 ```scala
-val server = new HttpServer(8080).start;
+val server = new HttpServer(8080).start
 server.registerListener("/hello",
 	req => new HttpResponse(req.version, StatusCode.OK, "<h1>Hello World !</h1>"))
 ```
@@ -42,6 +42,7 @@ URL 																	| Action
 
 You can also control statistics programmatically :
 ```scala
+val server = new HttpServer(8080).start
 server.enableStatistics
 server.disableStatistics
 server.resetStatistics
