@@ -20,7 +20,8 @@ What we call controllers, are in fact functions transforming an `com.ledoyen.sca
 
 ```scala
 val server = new HttpServer(8080).start;
-server.registerListener("/hello", (req: HttpRequest) => new HttpResponse(req.version, StatusCode.OK, "<h1>Hello World !</h1>"))
+server.registerListener("/hello",
+	req => new HttpResponse(req.version, StatusCode.OK, "<h1>Hello World !</h1>"))
 ```
 
 ## Statistics
@@ -30,11 +31,18 @@ Aash HTTP Server provides a build-in controller to serve statistics.
 server.registerListener("/stat", server.statistics)
 ```
 
-From there you can activate, desactivate or reset statistics :
+From there you can enable, disable or reset statistics :
 
 URL 																	| Action
 :-----------------------------------------------------------------------|:--------------------
 [http://localhost/stat](http://localhost/stat)							|	displays statistics
-[http://localhost/stat?enable=true](http://localhost/stat?enable=true)	|	activate statistics
-[http://localhost/stat?enable=false](http://localhost/stat?enable=false)|	desactivate statistics
+[http://localhost/stat?enable=true](http://localhost/stat?enable=true)	|	enable statistics
+[http://localhost/stat?enable=false](http://localhost/stat?enable=false)|	disable statistics
 [http://localhost/stat?reset=true](http://localhost/stat?reset=true)	|	reset statistics
+
+You can also control statistics programmatically :
+```scala
+server.enableStatistics
+server.disableStatistics
+server.resetStatistics
+```
