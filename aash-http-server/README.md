@@ -32,9 +32,9 @@ server.registerListener("/stat", server.statistics)
 
 From there you can activate, desactivate or reset statistics :
 
-URL 								| Action
-:-----------------------------------|:--------------------
-http://localhost/stat				|	displays statistics
-http://localhost/stat?enable=true	|	activate statistics
-http://localhost/stat?enable=false	|	desactivate statistics
-http://localhost/stat?reset=true	|	reset statistics
+URL 																	| Action
+:-----------------------------------------------------------------------|:--------------------
+[http://localhost/stat](http://localhost/stat)							|	displays statistics
+[http://localhost/stat?enable=true](http://localhost/stat?enable=true)	|	activate statistics
+[http://localhost/stat?enable=false](http://localhost/stat?enable=false)|	desactivate statistics
+[http://localhost/stat?reset=true](http://localhost/stat?reset=true)	|	reset statistics
