@@ -8,4 +8,6 @@ object Http {
   val HTTP_DATE_FORMAT = new java.text.SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH)
 
   def format(date: Date): String = HTTP_DATE_FORMAT.format(date)
+
+  def parse(source: String): Date = HTTP_DATE_FORMAT.parse(source)
 }
