@@ -4,10 +4,9 @@ import java.io.BufferedReader
 import scala.annotation.tailrec
 import java.io.Writer
 import java.util.Date
+import com.ledoyen.scala.aash.httpserver.Http
 
 package object HttpUtils {
-
-  val HTTP_DATE_FORMAT = new java.text.SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z")
 
   def parseRequest(in: BufferedReader): HttpRequest = {
     val firstLine = in.readLine
@@ -46,7 +45,7 @@ package object HttpUtils {
 
   def writeResponse(out: Writer, response: HttpResponse): Unit = {
     out.write(s"${response.version} ${response.code.id} ${response.code.toString}\r\n")
-    out.write(s"Date: ${HTTP_DATE_FORMAT.format(new Date())}\r\n")
+    out.write(s"Date: ${Http.format(new Date())}\r\n")
     // TODO use the real ${project.version}
     out.write("Server: Aash/0.0.1-SNAPSHOT\r\n");
 
@@ -60,7 +59,7 @@ package object HttpUtils {
     new HttpResponse(request.version, StatusCode.NOT_FOUND, "<TITLE>404 - NOT FOUND</TITLE>\r\n<P>Content cannot be found</P>")
   }
 
-  def error(request: HttpRequest, e: Exception): HttpResponse = {
+  def error(request: HttpRequest, e: Throwable): HttpResponse = {
     val body = s"<TITLE>500 - INTERNAL SERVER ERROR</TITLE>\r\n <p><b>${e.getClass.getName} ${e.getMessage}</b></p><p>${e.getStackTrace() mkString ("</p>\r\n<p>")}</p>"
     new HttpResponse(request.version, StatusCode.INTERNAL_SERVER_ERROR, body)
   }
