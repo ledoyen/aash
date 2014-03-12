@@ -17,7 +17,11 @@ import java.net.SocketException
 
 object HttpServer {
   def main(args: Array[String]) {
-    new HttpServer(Option(System.getProperty("aash.http.server.port")).map(_.toInt).getOrElse(80)).start
+    val server = new HttpServer(Option(System.getProperty("aash.http.server.port")).map(_.toInt).getOrElse(80)).start
+    if(Option(System.getProperty("aash.http.server.statistics.enabled")).exists("true" == _)) {
+      server.enableStatistics
+      server.registerListener(Option(System.getProperty("aash.http.server.statistics.path")).getOrElse("/stat"), server.statistics)
+    }
   }
 }
 
@@ -40,8 +44,14 @@ class HttpServer(val port: Int, val pool: ThreadPoolExecutor = Executors.newCach
 
   def registerListener(path: String, listener: HttpHandler): Unit = pathListeners += (path -> listener)
 
-  def enableStatistics: Unit = statActive = true
-  def disableStatistics: Unit = statActive = false
+  def enableStatistics: Unit = {
+    println("Statistics enabled");
+    statActive = true
+  }
+  def disableStatistics: Unit = {
+    println("Statistics disabled");
+    statActive = false
+  }
   def resetStatistics: Unit = simons.foreach(_.reset)
 
   def statistics: HttpRequest => HttpResponse = (req: HttpRequest) => {

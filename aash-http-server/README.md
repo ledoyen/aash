@@ -27,8 +27,10 @@ server.registerListener("/hello",
 ## Statistics
 
 Aash HTTP Server provides a build-in controller to serve statistics.
-```scala
-server.registerListener("/stat", server.statistics)
+
+To activate statistics, use the following system property
+```bash
+> java -jar aash-http-server -Daash.http.server.statistics.enabled=true
 ```
 
 From there you can enable, disable or reset statistics :
@@ -40,9 +42,14 @@ URL 																	| Action
 [http://localhost/stat?enable=false](http://localhost/stat?enable=false)|	disable statistics
 [http://localhost/stat?reset=true](http://localhost/stat?reset=true)	|	reset statistics
 
+To change the path where statistics controller is binded, use the following system property
+```bash
+> java -jar aash-http-server -Daash.http.server.statistics.enabled=true -Daash.http.server.statistics.path=/stat
+```
+
 You can also control statistics programmatically :
 ```scala
-val server = new HttpServer(8080).start
+server.registerListener("/stat", server.statistics)
 server.enableStatistics
 server.disableStatistics
 server.resetStatistics
