@@ -13,6 +13,7 @@ import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import org.javasimon.SimonManager
 import java.util.concurrent.ThreadPoolExecutor
+import java.net.SocketException
 
 object HttpServer {
   def main(args: Array[String]) {
@@ -44,9 +45,9 @@ class HttpServer(val port: Int, val pool: ThreadPoolExecutor = Executors.newCach
   def resetStatistics: Unit = simons.foreach(_.reset)
 
   def statistics: HttpRequest => HttpResponse = (req: HttpRequest) => {
-    if(req.getParameters.get("reset").exists("true" == _)) resetStatistics
-    if(req.getParameters.get("enable").exists("true" == _)) enableStatistics
-    if(req.getParameters.get("enable").exists("false" == _)) disableStatistics
+    if (req.getParameters.get("reset").exists("true" == _)) resetStatistics
+    if (req.getParameters.get("enable").exists("true" == _)) enableStatistics
+    if (req.getParameters.get("enable").exists("false" == _)) disableStatistics
     new HttpResponse(req.version, StatusCode.OK, s"Active threads : ${pool.getActiveCount} (${pool.getPoolSize})\r\n${simons.mkString("\r\n")}")
   }
 
@@ -56,11 +57,17 @@ class HttpServer(val port: Int, val pool: ThreadPoolExecutor = Executors.newCach
     var mustStop = false
 
     override def run = {
-      while (!mustStop) {
-        if (!serverSocket.isClosed()) {
-          val socket = serverSocket.accept
-          pool.submit(new SocketHandler(socket))
+      try {
+        while (!mustStop) {
+          if (!serverSocket.isClosed()) {
+            try {
+              val socket = serverSocket.accept
+              pool.submit(new SocketHandler(socket))
+            }
+          }
         }
+      } catch {
+        case e: SocketException =>
       }
     }
 
@@ -80,7 +87,7 @@ class HttpServer(val port: Int, val pool: ThreadPoolExecutor = Executors.newCach
         val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream)), true)
         try {
           val request = HttpUtils.parseRequest(in)
-          
+
           val split = HttpUtils.option(statActive, SimonManager.getStopwatch(s"HTTP-$port-${request.path.replace("/", "")}").start)
           System.out.println(s"${Thread.currentThread().getName()} $request");
 
@@ -91,7 +98,7 @@ class HttpServer(val port: Int, val pool: ThreadPoolExecutor = Executors.newCach
               HttpUtils.writeResponse(out, HttpUtils.notFound(request))
             }
           } catch {
-            case e: Exception => HttpUtils.writeResponse(out, HttpUtils.error(request, e))
+            case e: Throwable => HttpUtils.writeResponse(out, HttpUtils.error(request, e))
           } finally {
             in.close
             out.close
