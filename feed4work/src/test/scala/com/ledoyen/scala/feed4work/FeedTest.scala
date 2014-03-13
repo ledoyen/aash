@@ -9,16 +9,10 @@ class FeedTest {
 
   @Test
   def testJsonSerializationAndDeserialization = {
-    val feeds = List(new Feed("Feed 1", "http://toto.titi.com", new Date(), "toto <br/><b>titi</b>"),
-      new Feed("Feed 2", "http://toto.titi.com", new Date(), "titi <br/><b>toto</b>"))
-
-    val jsonFeeds = Feed.toJson(feeds)
-//    println(jsonFeeds)
-
-    val readFeeds = Feed.fromJSON(jsonFeeds)
-//    println(readFeeds)
-
-    assertThat(readFeeds, CoreMatchers.notNullValue)
-    assertThat(readFeeds.size, CoreMatchers.equalTo(feeds.size))
+    val feeds = List(new Feed("Feed 1", "http://toto.titi.com", new Date, "toto <br/><b>titi</b>"),
+      new Feed("Feed 2", "http://toto.titi.com", new Date, "titi <br/><b>toto</b>"))
+      for(feed <- feeds) {
+        println(feed.toJson)
+      }
   }
 }

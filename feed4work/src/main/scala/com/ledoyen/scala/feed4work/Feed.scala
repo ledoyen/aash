@@ -16,17 +16,12 @@ class Feed(val title: String, val link: String, val pubDate: Date, val descripti
       <description>{ description }</description>
       <pubDate>{ Http.format(pubDate) }</pubDate>
     </item>
+
+   def toJson: String = JacksonWrapper.serialize(this)
 }
 
 object Feed {
-  def fromJSONFile(source: String): List[Feed] = {
-    val jsonString = Source.fromFile(source).getLines mkString ("\r\n")
-    fromJSON(jsonString)
+  def fromJSON(jsonString: String): Feed = {
+    JacksonWrapper.deserialize[Feed](jsonString)
   }
-
-  def fromJSON(jsonString: String): List[Feed] = {
-    JacksonWrapper.deserialize[List[Feed]](jsonString)
-  }
-
-  def toJson(feeds : List[Feed]): String = JacksonWrapper.prettySerialize(feeds)
 }
