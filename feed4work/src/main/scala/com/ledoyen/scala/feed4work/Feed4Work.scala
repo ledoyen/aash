@@ -35,12 +35,15 @@ object Feed4Work {
   }
 }
 
-class Feed4Work(val serverPort: Int = 80, val sourceFolderPath: String = Feed4Work.defaultSourceFolderPath, statEnabled: Boolean = true, statPath: String = "/stat", val rssPath: String = "/rss") extends HttpServer(serverPort) {
+class Feed4Work(val serverPort: Int = 80, val sourceFolderPath: String = Feed4Work.defaultSourceFolderPath, val rssPath: String = "/rss") extends HttpServer(serverPort) {
+
+  val feedSource = new FeedSource(Feed4Work.resolveSourceFolder(sourceFolderPath))
 
   override def start = {
     super.start
-    val feedSource = new FeedSource(Feed4Work.resolveSourceFolder(sourceFolderPath))
     registerListener(rssPath, new RssFeedView(feedSource))
     this
   }
+
+  def push(feed: Feed) = feedSource.push(feed)
 }
