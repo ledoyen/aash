@@ -45,7 +45,7 @@ public abstract class AbstractTest {
 	public static Collection<Object[]> params() {
 	    return Arrays.asList(
 	    		new Object[] { null, null, null, null, true, true, null, null, null, null, null, null},
-	            new Object[] { 7, 77, 0d, null, true, true, "M.", Lists.newArrayList("toto", "titi"), new Date(), null, null, null}
+	            new Object[] { 7, 77, 0d, null, true, true, "M.", Lists.newArrayList("toto", "titi"), new Date(), null, "42", "C"}
 	            );
 	}
 }

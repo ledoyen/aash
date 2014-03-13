@@ -1,5 +1,7 @@
 package com.ledoyen.sql.querybuilder.jpa;
 
+import static com.ledoyen.sql.querybuilder.WhereClauses.conditional;
+import static com.ledoyen.sql.querybuilder.WhereClauses.or;
 import static org.junit.Assert.assertThat;
 
 import java.sql.SQLException;
@@ -22,11 +24,10 @@ import org.junit.runners.Parameterized;
 import com.ledoyen.sql.querybuilder.AbstractTest;
 import com.ledoyen.sql.querybuilder.QueryBuilder;
 import com.ledoyen.sql.querybuilder.UserClauses;
-import com.ledoyen.sql.querybuilder.WhereClauses;
 import com.ledoyen.tool.Dates;
 
 @RunWith(Parameterized.class)
-public class NativeQueryBuilderTest extends AbstractTest implements UserClauses {
+public class QueryBuilderTest extends AbstractTest implements UserClauses {
 
 	private static EntityManager entityManager;
 
@@ -43,7 +44,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 		}
 	}
 
-	public NativeQueryBuilderTest(Integer ageMin, Integer ageMax, Double scoreMin, Double scoreMax,
+	public QueryBuilderTest(Integer ageMin, Integer ageMax, Double scoreMin, Double scoreMax,
 			boolean scoreMinInclusive, boolean scoreMaxInclusive, String civility,
 			List<String> variableNames, Date startDate, Date endDate, String code, String category) {
 		super(ageMin, ageMax, scoreMin, scoreMax, scoreMinInclusive, scoreMaxInclusive, civility,
@@ -82,11 +83,11 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 						USER_AGE.with(ageMin, ageMax),
 						SCORE_MIN.with(scoreMin, scoreMinInclusive),
 						SCORE_MAX.with(scoreMax, scoreMaxInclusive),
-						WhereClauses.conditional(civility != null, "M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR),
+						conditional(civility != null, "M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR),
 						SCORE_NAMES.with(names),
 						CREATION_DATE.betweenDates(startDate, endDate),
-						REGION_CODE.with(code),
-						REGION_CATEGORY.with(category))
+						or(REGION_CODE.with(code),
+								REGION_CATEGORY.with(category)))
 				.groupOrOrder("group by s.name");
 
 		System.out.println(nqb.getQueryAsString());

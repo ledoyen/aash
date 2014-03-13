@@ -24,5 +24,5 @@ public final class Lists2 {
 				toFlatList.add((T) item);
 			}
 		}
-	}
+	}	
 }
