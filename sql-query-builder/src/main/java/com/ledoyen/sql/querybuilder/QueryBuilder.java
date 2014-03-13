@@ -3,26 +3,33 @@ package com.ledoyen.sql.querybuilder;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-public final class NativeQueryBuilder extends AbstractQueryBuilder {
+public final class QueryBuilder extends AbstractQueryBuilder {
 
-	private NativeQueryBuilder(String select) {
+	private QueryBuilder(String select) {
 		super(select);
 	}
 
-	public static NativeQueryBuilder select(String select) {
-		return new NativeQueryBuilder(select);
+	public static QueryBuilder select(String select) {
+		return new QueryBuilder(select);
 	}
 
-	public NativeQueryBuilder where(WhereClause... clauses) {
-		return (NativeQueryBuilder) super.where(clauses);
+	public QueryBuilder where(WhereClause... clauses) {
+		return (QueryBuilder) super.where(clauses);
 	}
 
-	public NativeQueryBuilder groupOrOrder(String groupOrOrderClause) {
-		return (NativeQueryBuilder) super.groupOrOrder(groupOrOrderClause);
+	public QueryBuilder groupOrOrder(String groupOrOrderClause) {
+		return (QueryBuilder) super.groupOrOrder(groupOrOrderClause);
 	}
 
 	public Query query(EntityManager em) {
-		Query query = em.createNativeQuery(getQueryAsString());
+		return prepareQuery(em.createQuery(getQueryAsString()));
+	}
+
+	public Query nativeQuery(EntityManager em) {
+		return prepareQuery(em.createNativeQuery(getQueryAsString()));
+	}
+
+	private Query prepareQuery(Query query) {
 		QueryAdapter queryAdapter = new  JpaQueryAdapter(query);
 		for (WhereClause whereClause : clauses) {
 			if (whereClause.isApplicable()) {

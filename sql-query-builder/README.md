@@ -5,7 +5,7 @@ SQL-Query-Builder is a tool to help you compose native sql queries and make DAO 
 Assuming the definition of a library of clauses, your DAO code will look like :
 
 ```java
-NativeQueryBuilder nqb = NativeQueryBuilder
+QueryBuilder nqb = QueryBuilder
 	.select(INITIAL_SELECT)
 	.where(JOIN_USER_CIVILITY,
 			JOIN_USER_SCORE,
@@ -21,16 +21,16 @@ NativeQueryBuilder nqb = NativeQueryBuilder
 			REGION_CATEGORY.withString(category))
 	.groupOrOrder("group by s.name");
 
-List<?> results = nqb.query(getEntityManager()).getResultList();
+List<?> results = nqb.nativeQuery(getEntityManager()).getResultList();
 ```
 
 ## JPA
 SQL-Query-Builder supports JPA as you can see above by building a **javax.persistence.Query**, given an **javax.persistence.EntityManager** :
 ```java
-NativeQueryBuilder nqb = NativeQueryBuilder
+QueryBuilder nqb = QueryBuilder
 	.select(INITIAL_SELECT)
 ...
-Query query = nqb.query(getEntityManager());
+Query query = nqb.nativeQuery(getEntityManager());
 List<?> results = query.getResultList();
 ```
 

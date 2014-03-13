@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import com.ledoyen.sql.querybuilder.AbstractTest;
-import com.ledoyen.sql.querybuilder.NativeQueryBuilder;
+import com.ledoyen.sql.querybuilder.QueryBuilder;
 import com.ledoyen.sql.querybuilder.UserClauses;
 import com.ledoyen.sql.querybuilder.WhereClauses;
 import com.ledoyen.tool.Dates;
@@ -54,7 +54,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 	public void duplicateParameterNames() {
 		Integer ageMin = 7, ageMax = 77;
 
-		NativeQueryBuilder
+		QueryBuilder
 				.select(INITIAL_SELECT)
 				.where(USER_AGE.with(ageMin, ageMax),
 						USER_AGE.with(ageMin, ageMax),
@@ -64,7 +64,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 
 	@Test
 	public void whereWordNotPresentIfNoneMatchs() {
-		NativeQueryBuilder nqb = NativeQueryBuilder
+		QueryBuilder nqb = QueryBuilder
 				.select(INITIAL_SELECT)
 				.where(USER_AGE.with(null, null),
 						REGION_CODE.with((String) null));
@@ -73,7 +73,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 
 	@Test
 	public void testNativeQueryBuilder() {
-		NativeQueryBuilder nqb = NativeQueryBuilder
+		QueryBuilder nqb = QueryBuilder
 				.select(INITIAL_SELECT)
 				.where(JOIN_USER_CIVILITY,
 						JOIN_USER_SCORE,
@@ -90,7 +90,7 @@ public class NativeQueryBuilderTest extends AbstractTest implements UserClauses 
 				.groupOrOrder("group by s.name");
 
 		System.out.println(nqb.getQueryAsString());
-		List<?> results = nqb.query(entityManager).getResultList();
+		List<?> results = nqb.nativeQuery(entityManager).getResultList();
 		System.out.println(results);
 	}
 
