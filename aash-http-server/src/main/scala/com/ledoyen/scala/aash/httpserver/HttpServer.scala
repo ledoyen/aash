@@ -25,7 +25,7 @@ object HttpServer {
   }
 }
 
-class HttpServer(val port: Int, val pool: ThreadPoolExecutor = Executors.newCachedThreadPool.asInstanceOf[ThreadPoolExecutor]) {
+class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.newCachedThreadPool.asInstanceOf[ThreadPoolExecutor]) {
 
   type HttpHandler = HttpRequest => HttpResponse
 
