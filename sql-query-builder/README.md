@@ -14,11 +14,11 @@ QueryBuilder nqb = QueryBuilder
 			USER_AGE.with(ageMin, ageMax),
 			SCORE_MIN.with(scoreMin, scoreMinInclusive),
 			SCORE_MAX.with(scoreMax, scoreMaxInclusive),
-			WhereClauses.conditional(civility != null, "M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR),
+			conditional(civility != null, "M.".equals(civility) ? CIVILITY_MR : CIVILITY_NOT_MR),
 			SCORE_NAMES.with(names),
 			CREATION_DATE.betweenDates(startDate, endDate),
-			REGION_CODE.with(code),
-			REGION_CATEGORY.withString(category))
+			or(REGION_CODE.with(code),
+			REGION_CATEGORY.withString(category)))
 	.groupOrOrder("group by s.name");
 
 List<?> results = nqb.nativeQuery(getEntityManager()).getResultList();
