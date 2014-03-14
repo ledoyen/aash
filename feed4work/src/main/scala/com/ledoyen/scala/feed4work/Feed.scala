@@ -38,3 +38,11 @@ object Feed {
     JacksonWrapper.deserialize[Feed](jsonString)
   }
 }
+
+object FeedType extends Enumeration {
+  type Feed = Value
+  
+  val RSS = Value
+  val ATOM = Value
+}
+

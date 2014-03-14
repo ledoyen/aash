@@ -41,8 +41,8 @@ class Feed4Work(val serverPort: Int = 80, val sourceFolderPath: String = Feed4Wo
 
   override def start = {
     super.start
-    registerListener(rssPath, new RssFeedView(feedSource))
-    registerListener("/atom", new AtomFeedView(feedSource))
+    new FeedView(this, feedSource, "/rss", FeedType.RSS).selfRegister
+    new FeedView(this, feedSource, "/atom", FeedType.ATOM).selfRegister
     this
   }
 
