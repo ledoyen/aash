@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter
 import org.javasimon.SimonManager
 import java.util.concurrent.ThreadPoolExecutor
 import java.net.SocketException
+import java.net.InetAddress
 
 object HttpServer {
   def main(args: Array[String]) {
@@ -28,6 +29,8 @@ object HttpServer {
 class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.newCachedThreadPool.asInstanceOf[ThreadPoolExecutor]) {
 
   type HttpHandler = HttpRequest => HttpResponse
+
+  val url = s"${InetAddress.getLocalHost}:$port/"
 
   private val serverThread = new HttpServerThread
   private val pathListeners: mutable.Map[String, HttpHandler] = mutable.Map()
