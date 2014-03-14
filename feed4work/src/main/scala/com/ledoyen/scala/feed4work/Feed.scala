@@ -9,15 +9,28 @@ import scala.util.parsing.json.JSON
 import scala.io.Source
 
 class Feed(val title: String, val link: String, val pubDate: Date, val description: String) {
-  def toXML: Node =
+  def toRSS: Node =
     <item>
       <title>{ title }</title>
       <link>{ link }</link>
       <description>{ description }</description>
-      <pubDate>{ Http.format(pubDate) }</pubDate>
+      <pubDate>{ Rss.format(pubDate) }</pubDate>
+      <guid>http://feed4work{ pubDate.getTime }.com/</guid>
     </item>
 
-   def toJson: String = JacksonWrapper.serialize(this)
+  def toATOM: Node =
+    <entry>
+      <title>{ title }</title>
+      <link href={ link }/>
+      <summary type="html">{ description }</summary>
+      <id>http://feed4work{ pubDate.getTime }.com/</id>
+      <updated>{ Atom.format(pubDate) }</updated>
+      <author>
+        <name>feed4work</name>
+      </author>
+    </entry>
+
+  def toJson: String = JacksonWrapper.serialize(this)
 }
 
 object Feed {
