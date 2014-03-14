@@ -48,6 +48,7 @@ package object HttpUtils {
     out.write(s"Date: ${Http.format(new Date())}\r\n")
     // TODO use the real ${project.version}
     out.write("Server: Aash/0.0.1-SNAPSHOT\r\n");
+    response.headers.foreach(h => out.write(s"$h\r\n"))
 
     out.write("\r\n");
     out.write(response.body);
