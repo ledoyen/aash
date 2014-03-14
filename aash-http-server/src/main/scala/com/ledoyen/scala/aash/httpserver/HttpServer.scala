@@ -15,8 +15,11 @@ import org.javasimon.SimonManager
 import java.util.concurrent.ThreadPoolExecutor
 import java.net.SocketException
 import java.net.InetAddress
+import org.slf4j.LoggerFactory
 
 object HttpServer {
+  def logger = LoggerFactory.getLogger("HttpServer")
+
   def main(args: Array[String]) {
     val server = new HttpServer(Option(System.getProperty("aash.http.server.port")).map(_.toInt).getOrElse(80)).start
     if(Option(System.getProperty("aash.http.server.statistics.enabled")).exists("true" == _)) {
@@ -48,11 +51,11 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
   def registerListener(path: String, listener: HttpHandler): Unit = pathListeners += (path -> listener)
 
   def enableStatistics: Unit = {
-    println("Statistics enabled");
+    HttpServer.logger.debug("Statistics enabled")
     statActive = true
   }
   def disableStatistics: Unit = {
-    println("Statistics disabled");
+    HttpServer.logger.debug("Statistics disabled")
     statActive = false
   }
   def resetStatistics: Unit = simons.foreach(_.reset)
@@ -65,7 +68,7 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
   }
 
   class HttpServerThread extends Thread {
-    println("Starting server");
+    HttpServer.logger.debug("Starting server")
     val serverSocket: ServerSocket = new ServerSocket(port)
     var mustStop = false
 
@@ -85,7 +88,7 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
     }
 
     def stopServer: Unit = {
-      println("Stoping server...");
+      HttpServer.logger.debug("Stoping server...")
       mustStop = true
       // wait for the pill to go
       Thread.sleep(32)
@@ -102,7 +105,7 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
           val request = HttpUtils.parseRequest(in)
 
           val split = HttpUtils.option(statActive, SimonManager.getStopwatch(s"HTTP-$port-${request.path.replace("/", "")}").start)
-          System.out.println(s"${Thread.currentThread().getName()} $request");
+          HttpServer.logger.trace(s"$request")
 
           try {
             if (pathListeners.contains(request.path)) {
@@ -126,7 +129,7 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
           }
         }
       } catch {
-        case t: Throwable => t.printStackTrace();
+        case t: Throwable => HttpServer.logger.error("", t)
       } finally {
         socket.close
       }
