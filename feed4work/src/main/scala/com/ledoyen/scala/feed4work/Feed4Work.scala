@@ -1,8 +1,14 @@
 package com.ledoyen.scala.feed4work
 
+import cronish._
+import dsl._
 import com.ledoyen.scala.httpserver.HttpServer
 import java.io.File
 import java.nio.file.Paths
+import com.ledoyen.scala.feed4work.connector.JenkinsConnector
+import com.ledoyen.scala.feed4work.connector.MailConnector
+import dispatch.Http
+import com.ledoyen.scala.feed4work.connector.Connector
 
 object Feed4Work {
 
@@ -35,15 +41,28 @@ object Feed4Work {
   }
 }
 
-class Feed4Work(val serverPort: Int = 80, val sourceFolderPath: String = Feed4Work.defaultSourceFolderPath, val rssPath: String = "/rss") extends HttpServer(serverPort) {
+class Feed4Work(override val port: Int = 80, val sourceFolderPath: String = Feed4Work.defaultSourceFolderPath, val rssPath: String = "/rss") extends HttpServer(port) {
 
   val feedSource = new FeedSource(Feed4Work.resolveSourceFolder(sourceFolderPath))
+
+  val connectors: List[Connector] = List(
+      new JenkinsConnector("https://jenkins.megalo-company.com", "every 5 seconds".cron)
+//      ,new MailConnector("https://jenkins.megalo-company.com", "every 1 seconds".cron)
+      )
 
   override def start = {
     super.start
     new FeedView(this, feedSource, "/rss", FeedType.RSS).selfRegister
     new FeedView(this, feedSource, "/atom", FeedType.ATOM).selfRegister
+
+    connectors.foreach(_.start)
     this
+  }
+
+  override def stop = {
+	super.stop
+    Scheduled.shutdown
+    Http.shutdown
   }
 
   def push(feed: Feed) = feedSource.push(feed)
