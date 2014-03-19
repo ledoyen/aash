@@ -98,6 +98,10 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
 
   class SocketHandler(socket: Socket) extends Runnable {
     def run() {
+      def getListener(path: String): Option[HttpRequest => HttpResponse] = {
+        pathListeners.filter(tuple => path.startsWith(tuple._1)).headOption.map(_._2)
+      }
+      
       try {
         val in = new BufferedReader(new InputStreamReader(socket.getInputStream))
         val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream)), true)
@@ -108,10 +112,10 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
           HttpServer.logger.trace(s"$request")
 
           try {
-            if (pathListeners.contains(request.path)) {
-              HttpUtils.writeResponse(out, pathListeners(request.path)(request))
-            } else {
-              HttpUtils.writeResponse(out, HttpUtils.notFound(request))
+            val listener = getListener(request.path)
+            listener match {
+              case Some(l) => HttpUtils.writeResponse(out, l(request))
+              case None => HttpUtils.writeResponse(out, HttpUtils.notFound(request))
             }
           } catch {
             case e: Throwable => HttpUtils.writeResponse(out, HttpUtils.error(request, e))
