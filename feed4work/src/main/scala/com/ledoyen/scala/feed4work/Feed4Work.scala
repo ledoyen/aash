@@ -46,8 +46,26 @@ class Feed4Work(override val port: Int = 80, val sourceFolderPath: String = Feed
   val feedSource = new FeedSource(Feed4Work.resolveSourceFolder(sourceFolderPath))
 
   val connectors: List[Connector] = List(
-      new JenkinsConnector("https://jenkins.megalo-company.com", "every 10 seconds".cron, "lledoyen", "azerty")
-//      ,new MailConnector("https://jenkins.megalo-company.com", "every 30 seconds".cron)
+      new JenkinsConnector(
+          adress = "https://jenkins.megalo-company.com",
+          cron = "every 10 seconds".cron,
+          login = System.getProperty("feed4work.server.jenkins.login"),
+          password = System.getProperty("feed4work.server.jenkins.password"))
+      , new MailConnector(
+          tag = "OUTLOOK",
+          host = "outlook.office365.com",
+          port = Option(995),
+          protocol = "pop3s",
+          cron = "every 10 minutes".cron,
+          login = System.getProperty("feed4work.server.outlook.login"),
+          password = System.getProperty("feed4work.server.outlook.password"))
+      , new MailConnector(
+          tag = "GMAIL",
+          host = "imap.gmail.com",
+          protocol = "imaps",
+          cron = "every 3 minutes".cron,
+          login = System.getProperty("feed4work.server.gmail.login"),
+          password = System.getProperty("feed4work.server.gmail.password"))
       )
 
   override def start = {

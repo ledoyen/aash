@@ -6,6 +6,7 @@ import java.nio.file.Paths
 import java.util.Date
 import java.io.RandomAccessFile
 import org.slf4j.LoggerFactory
+import java.io.PrintWriter
 
 object FeedSource {
   def logger = LoggerFactory.getLogger("FeedSource")
@@ -18,13 +19,16 @@ class FeedSource(val sourceFolder: File) {
 
   val channel = Channel.fromXMLFile(channelFilepath)
   var lastBuildDate = new Date
-  var last25Feeds: List[Feed] = Source.fromFile(feedsFilepath).getLines.filter("" != _).map(Feed.fromJSON(_)).take(25).toList
+  var last25Feeds: List[Feed] = Source.fromFile(feedsFilepath).getLines.filter(line => "" != line && line.head != 0xfeff).map(Feed.fromJSON(_)).take(25).toList
 
   // TODO store async
   def push(feed: Feed) = {
     last25Feeds = feed :: (last25Feeds.take(24))
     lastBuildDate = new Date
-    writeToFile(feed)
+    // TODO use some queue
+    this.synchronized {
+    	writeToFile(feed)
+    }
 //    val t = Source.fromFile(feedsFilepath)
 //    val f = new RandomAccessFile(new File(feedsFilepath), "rw")
 //    try {
@@ -33,13 +37,16 @@ class FeedSource(val sourceFolder: File) {
 //    } finally {
 //      f.close
 //    }
-//    FeedSource.logger.trace(s"new Feed pushed [${feed.title}]")
+    FeedSource.logger.trace(s"new Feed pushed [${feed.title}]")
   }
 
   private def writeToFile(feed: Feed) = {
-    import scalax.io._
-    val newLines = feed.toJson :: Source.fromFile(feedsFilepath).getLines.filter("" != _).take(299).toList
-    val output:Output = Resource.fromFile(feedsFilepath)
-    output.writeStrings(newLines,"\r\n")(Codec.UTF8)
+//    import scalax.io._
+    val newLines = feed.toJson :: Source.fromFile(feedsFilepath).getLines.filter(line => "" != line && line.head != 0xfeff).take(299).toList
+    val pw = new PrintWriter(feedsFilepath , "UTF-8")
+    pw.print(newLines.mkString("\r\n"))
+    pw.close
+//    val output:Output = Resource.fromFile(feedsFilepath)
+//    output.writeStrings(newLines,"\r\n")(Codec.UTF8)
   }
 }
