@@ -20,6 +20,13 @@
 			<version>${scala.version}</version>
 		</dependency>
 
+		<!-- SCALAX.IO -->
+		<dependency>
+			<groupId>com.github.scala-incubator.io</groupId>
+			<artifactId>scala-io-file_2.10</artifactId>
+			<version>0.4.2</version>
+		</dependency>
+
 		<!-- Aash HTTP Server -->
 		<dependency>
 			<groupId>com.ledoyen.scala</groupId>
@@ -41,13 +48,20 @@
 			<version>0.11.0</version>
 		</dependency>
 
+		<!-- MAIL -->
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>1.4.7</version>
+		</dependency>
+
 		<!-- Jackson -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-scala_2.10</artifactId>
 			<version>2.3.1</version>
 		</dependency>
-		
+
 		<!-- TEST -->
 		<dependency>
 			<groupId>junit</groupId>

@@ -31,6 +31,8 @@ class Feed(val title: String, val link: String, val pubDate: Date, val descripti
     </entry>
 
   def toJson: String = JacksonWrapper.serialize(this)
+
+  override def toString = s"$title ($link) $pubDate"
 }
 
 object Feed {

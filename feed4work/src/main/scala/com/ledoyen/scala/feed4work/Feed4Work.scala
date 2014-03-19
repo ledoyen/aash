@@ -46,8 +46,8 @@ class Feed4Work(override val port: Int = 80, val sourceFolderPath: String = Feed
   val feedSource = new FeedSource(Feed4Work.resolveSourceFolder(sourceFolderPath))
 
   val connectors: List[Connector] = List(
-      new JenkinsConnector("https://jenkins.megalo-company.com", "every 5 seconds".cron)
-//      ,new MailConnector("https://jenkins.megalo-company.com", "every 1 seconds".cron)
+      new JenkinsConnector("https://jenkins.megalo-company.com", "every 10 seconds".cron, "lledoyen", "azerty")
+//      ,new MailConnector("https://jenkins.megalo-company.com", "every 30 seconds".cron)
       )
 
   override def start = {
@@ -55,6 +55,7 @@ class Feed4Work(override val port: Int = 80, val sourceFolderPath: String = Feed
     new FeedView(this, feedSource, "/rss", FeedType.RSS).selfRegister
     new FeedView(this, feedSource, "/atom", FeedType.ATOM).selfRegister
 
+    connectors.foreach(_.connect(feedSource))
     connectors.foreach(_.start)
     this
   }
