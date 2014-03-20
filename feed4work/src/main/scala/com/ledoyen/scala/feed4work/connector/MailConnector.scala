@@ -9,7 +9,10 @@ object MailConnector {
 
   def getDate(message: Message) = Option(message.getReceivedDate()).getOrElse(message.getSentDate())
 
-  def buildFeed(message: Message, tag: String, link: String): Feed = new Feed(s"[$tag] ${message.getSubject}", link, getDate(message), s"${message.getContent}")
+  def buildFeed(message: Message, tag: String, link: String): Feed = {
+    val date = getDate(message)
+    new Feed(s"[$tag] ${message.getSubject}", s"$link/${date.getTime}", date, s"${message.getContent}")
+  }
 }
 
 class MailConnector(val host: String, val port: Option[Int] = None, val protocol: String, override val cron: Cron,
