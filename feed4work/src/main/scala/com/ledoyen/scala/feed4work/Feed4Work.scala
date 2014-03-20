@@ -48,12 +48,13 @@ class Feed4Work(override val port: Int = 80, val sourceFolderPath: String = Feed
   val connectors: List[Connector] = List(
       new JenkinsConnector(
           adress = "https://jenkins.megalo-company.com",
-          cron = "every 10 seconds".cron,
+          cron = "every 30 seconds".cron,
           login = System.getProperty("feed4work.server.jenkins.login"),
           password = System.getProperty("feed4work.server.jenkins.password"))
       , new MailConnector(
           tag = "OUTLOOK",
           host = "outlook.office365.com",
+          link = "http://google.com",
           port = Option(995),
           protocol = "pop3s",
           cron = "every 10 minutes".cron,
@@ -62,6 +63,7 @@ class Feed4Work(override val port: Int = 80, val sourceFolderPath: String = Feed
       , new MailConnector(
           tag = "GMAIL",
           host = "imap.gmail.com",
+          link = "http://google.com",
           protocol = "imaps",
           cron = "every 3 minutes".cron,
           login = System.getProperty("feed4work.server.gmail.login"),

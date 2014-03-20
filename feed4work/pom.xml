@@ -20,13 +20,6 @@
 			<version>${scala.version}</version>
 		</dependency>
 
-		<!-- SCALAX.IO -->
-		<dependency>
-			<groupId>com.github.scala-incubator.io</groupId>
-			<artifactId>scala-io-file_2.10</artifactId>
-			<version>0.4.2</version>
-		</dependency>
-
 		<!-- Aash HTTP Server -->
 		<dependency>
 			<groupId>com.ledoyen.scala</groupId>

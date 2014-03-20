@@ -22,31 +22,20 @@ class FeedSource(val sourceFolder: File) {
   var last25Feeds: List[Feed] = Source.fromFile(feedsFilepath).getLines.filter(line => "" != line && line.head != 0xfeff).map(Feed.fromJSON(_)).take(25).toList
 
   // TODO store async
+  // TODO use some queue
   def push(feed: Feed) = {
-    last25Feeds = feed :: (last25Feeds.take(24))
-    lastBuildDate = new Date
-    // TODO use some queue
     this.synchronized {
+	    last25Feeds = feed :: (last25Feeds.take(24))
+	    lastBuildDate = new Date
     	writeToFile(feed)
     }
-//    val t = Source.fromFile(feedsFilepath)
-//    val f = new RandomAccessFile(new File(feedsFilepath), "rw")
-//    try {
-//      f.seek(0)
-//      f.write(feed.toJson.getBytes)
-//    } finally {
-//      f.close
-//    }
     FeedSource.logger.trace(s"new Feed pushed [${feed.title}]")
   }
 
   private def writeToFile(feed: Feed) = {
-//    import scalax.io._
     val newLines = feed.toJson :: Source.fromFile(feedsFilepath).getLines.filter(line => "" != line && line.head != 0xfeff).take(299).toList
     val pw = new PrintWriter(feedsFilepath , "UTF-8")
     pw.print(newLines.mkString("\r\n"))
     pw.close
-//    val output:Output = Resource.fromFile(feedsFilepath)
-//    output.writeStrings(newLines,"\r\n")(Codec.UTF8)
   }
 }
