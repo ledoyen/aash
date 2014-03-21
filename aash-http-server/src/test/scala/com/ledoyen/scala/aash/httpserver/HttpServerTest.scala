@@ -1,4 +1,4 @@
-package com.ledoyen.scala.httpserver
+package com.ledoyen.scala.aash.httpserver
 
 import org.junit._
 

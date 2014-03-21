@@ -1,4 +1,4 @@
-package com.ledoyen.scala.httpserver
+package com.ledoyen.scala.aash.httpserver
 
 import scala.collection.JavaConversions._
 import scala.collection.{ mutable, immutable, generic }
@@ -16,13 +16,15 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.net.SocketException
 import java.net.InetAddress
 import org.slf4j.LoggerFactory
+import com.ledoyen.scala.aash.tool.Streams
+import scala.annotation.tailrec
 
 object HttpServer {
   def logger = LoggerFactory.getLogger("HttpServer")
 
   def main(args: Array[String]) {
     val server = new HttpServer(Option(System.getProperty("aash.http.server.port")).map(_.toInt).getOrElse(80)).start
-    if(Option(System.getProperty("aash.http.server.statistics.enabled")).exists("true" == _)) {
+    if (Option(System.getProperty("aash.http.server.statistics.enabled")).exists("true" == _)) {
       server.enableStatistics
       server.registerListener(Option(System.getProperty("aash.http.server.statistics.path")).getOrElse("/stat"), server.statistics)
     }
@@ -64,11 +66,11 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
     if (req.getParameters.get("reset").exists("true" == _)) resetStatistics
     if (req.getParameters.get("enable").exists("true" == _)) enableStatistics
     if (req.getParameters.get("enable").exists("false" == _)) disableStatistics
-    new HttpResponse(req.version, StatusCode.OK, s"Active threads : ${pool.getActiveCount} (${pool.getPoolSize})\r\n${simons.mkString("\r\n")}")
+    new HttpResponse(req.version, StatusCode.OK, s"Active threads : ${pool.getActiveCount} (${pool.getPoolSize})\r\n${simons.mkString("\r\n")}", List("Content-type: text/plain; charset=UTF-8"))
   }
 
   class HttpServerThread extends Thread {
-    HttpServer.logger.debug("Starting server")
+    HttpServer.logger.debug(s"Starting server on port [$port]")
     val serverSocket: ServerSocket = new ServerSocket(port)
     var mustStop = false
 
@@ -98,43 +100,43 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
 
   class SocketHandler(socket: Socket) extends Runnable {
     def run() {
-      def getListener(path: String): Option[HttpRequest => HttpResponse] = {
-        pathListeners.filter(tuple => path.startsWith(tuple._1)).headOption.map(_._2)
+      def getListener(path: String): Option[(String, HttpRequest => HttpResponse)] = {
+        pathListeners.filter(tuple => path.startsWith(tuple._1)).headOption
       }
-      
+
       try {
-        val in = new BufferedReader(new InputStreamReader(socket.getInputStream))
-        val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream)), true)
-        try {
-          val request = HttpUtils.parseRequest(in)
+        val optionalRequest = HttpUtils.parseRequest(socket.getInputStream)
+        optionalRequest match {
+          case None =>
+            socket.close; return
+          case Some(request) =>
+            HttpServer.logger.trace(s"$request")
 
-          val split = HttpUtils.option(statActive, SimonManager.getStopwatch(s"HTTP-$port-${request.path.replace("/", "")}").start)
-          HttpServer.logger.trace(s"$request")
+            val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream)), true)
 
-          try {
-            val listener = getListener(request.path)
-            listener match {
-              case Some(l) => HttpUtils.writeResponse(out, l(request))
-              case None => HttpUtils.writeResponse(out, HttpUtils.notFound(request))
+            val split = Http.option(statActive, SimonManager.getStopwatch(s"HTTP-$port-${request.path.replace("/", "")}").start)
+            HttpServer.logger.trace(s"$request")
+
+            try {
+              val listener = getListener(request.path)
+              listener match {
+                case Some(l) => {
+                  request.listenerPath = l._1
+                  HttpUtils.writeResponse(out, l._2(request))
+                }
+                case None => HttpUtils.writeResponse(out, Http.notFound(request))
+              }
+            } catch {
+              case e: Throwable => HttpUtils.writeResponse(out, Http.error(request, e))
+            } finally {
+              out.close
+              split.foreach(_.stop)
             }
-          } catch {
-            case e: Throwable => HttpUtils.writeResponse(out, HttpUtils.error(request, e))
-          } finally {
-            in.close
-            out.close
-            split.foreach(_.stop)
-          }
-        } catch {
-          // InputStream is empty, meaningless case
-          case e: IllegalStateException => {
-            in.close
-            out.close
-            return
-          }
         }
       } catch {
         case t: Throwable => HttpServer.logger.error("", t)
       } finally {
+        socket.getInputStream.close
         socket.close
       }
     }

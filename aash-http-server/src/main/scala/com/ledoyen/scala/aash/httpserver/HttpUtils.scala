@@ -1,32 +1,47 @@
-package com.ledoyen.scala.httpserver
+package com.ledoyen.scala.aash.httpserver
 
+import ExtendedStringMap._
 import java.io.BufferedReader
 import scala.annotation.tailrec
 import java.io.Writer
 import java.util.Date
-import com.ledoyen.scala.aash.httpserver.Http
+import java.io.InputStreamReader
+import java.io.InputStream
+import com.ledoyen.scala.aash.tool.Streams
+import scala.collection.immutable.Stream
 
 package object HttpUtils {
 
-  def parseRequest(in: BufferedReader): HttpRequest = {
+  def parseRequest(is: InputStream): Option[HttpRequest] = {
+    def readHeaders(in: BufferedReader, acc: Map[String, String]): Map[String, String] = {
+      val line = in.readLine
+      Option(line) match {
+        case Some(x) if !"".equals(x) => {
+          val sp = x.splitAt(x.prefixLength(p => ':' != p))
+          readHeaders(in, acc + (sp._1 -> sp._2.substring(1).trim))
+        }
+        case _ => acc
+      }
+    }
+
+    val in = new BufferedReader(new InputStreamReader(is))
     val firstLine = in.readLine
-    if(firstLine != null) {
-	    val firstLineArray = firstLine.split(" ")
-	    val pathAndParams = readPath(firstLineArray(1))
-	    new HttpRequest(firstLineArray(0), firstLineArray(2), pathAndParams._1, pathAndParams._2, readHeaders(in, Map()))
-    } else throw new IllegalStateException("InputStream is empty")
+    if (firstLine != null) {
+      val firstLineArray = firstLine.split(" ")
+      val pathAndParams = readPath(firstLineArray(1))
+      val headers  = readHeaders(in, Map())
+      val body = readBody(headers, in)
+      
+      Option(new HttpRequest(firstLineArray(0), firstLineArray(2), pathAndParams._1, pathAndParams._2, headers, body))
+    } else None
   }
 
-  @tailrec
-  def readHeaders(in: BufferedReader, acc: Map[String, String]): Map[String, String] = {
-    val line = in.readLine
-    Option(line) match {
-      case Some(x) if !"".equals(x) => {
-        val sp = x.splitAt(x.prefixLength(p => ':' != p))
-        readHeaders(in, acc + (sp._1 -> sp._2))
+  def readBody(headers: Map[String, String], in: BufferedReader): List[String] = {
+    val contentType = headers.getIC("Content-Length")
+    contentType match {
+        case None => Nil
+        case Some(x) => Stream.continually(in.read).take(x.toInt).map(_.toChar).mkString.split("\\r?\\n").toList
       }
-      case _ => acc
-    }
   }
 
   def readPath(p: String): (String, Map[String, String]) = {
@@ -54,18 +69,5 @@ package object HttpUtils {
     out.write(response.body);
 
     out.flush
-  }
-
-  def notFound(request: HttpRequest): HttpResponse = {
-    new HttpResponse(request.version, StatusCode.NOT_FOUND, "<TITLE>404 - NOT FOUND</TITLE>\r\n<P>Content cannot be found</P>")
-  }
-
-  def error(request: HttpRequest, e: Throwable): HttpResponse = {
-    val body = s"<TITLE>500 - INTERNAL SERVER ERROR</TITLE>\r\n <p><b>${e.getClass.getName} ${e.getMessage}</b></p><p>${e.getStackTrace() mkString ("</p>\r\n<p>")}</p>"
-    new HttpResponse(request.version, StatusCode.INTERNAL_SERVER_ERROR, body)
-  }
-
-  def option[T](condition: Boolean, o: => T) = {
-    if(!condition) None else Some(o)
   }
 }

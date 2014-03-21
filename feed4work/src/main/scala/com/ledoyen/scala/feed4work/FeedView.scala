@@ -1,15 +1,10 @@
 package com.ledoyen.scala.feed4work
 
-import com.ledoyen.scala.httpserver.HttpRequest
-import com.ledoyen.scala.httpserver.HttpResponse
-import com.ledoyen.scala.httpserver.HttpResponse
-import com.ledoyen.scala.httpserver.StatusCode
 import scala.xml.Node
 import scala.xml.XML
-import com.ledoyen.scala.aash.httpserver.Http
 import java.util.Locale
 import java.util.Date
-import com.ledoyen.scala.httpserver.HttpServer
+import com.ledoyen.scala.aash.httpserver._
 
 class FeedView(val server: HttpServer, val feedSource: FeedSource, val path: String, val feedType: FeedType.Value) extends Function1[HttpRequest, HttpResponse] {
 

@@ -2,13 +2,13 @@ package com.ledoyen.scala.feed4work
 
 import cronish._
 import dsl._
-import com.ledoyen.scala.httpserver.HttpServer
 import java.io.File
 import java.nio.file.Paths
+import dispatch.Http
 import com.ledoyen.scala.feed4work.connector.JenkinsConnector
 import com.ledoyen.scala.feed4work.connector.MailConnector
-import dispatch.Http
 import com.ledoyen.scala.feed4work.connector.Connector
+import com.ledoyen.scala.aash.httpserver._
 
 object Feed4Work {
 
