@@ -6,6 +6,10 @@ object StatusCode extends Enumeration {
   // 2xx
   val OK = Value(200, "OK")
 
+  // 3xx
+  val MOVED_PERMANENTLY = Value(301, "Moved Permanently")
+  val FOUND = Value(302, "Found")
+
   // 4xx
   val BAD_REQUEST = Value(400, "Bad Request")
   val UNAUTHORIZED = Value(401, "Unauthorized")

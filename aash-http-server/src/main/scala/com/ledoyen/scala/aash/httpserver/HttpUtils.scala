@@ -59,11 +59,4 @@ package object HttpUtils {
       case Some(x) => Stream.continually(in.read).take(x.toInt).map(_.toChar).mkString
     }
   }
-
-  def readResponseBody(in: BufferedReader, is: InputStream): String = {
-//    val body = Streams.continually(in.read, is.available != 0).map(_.toChar).mkString
-    val body = Stream.continually(in.read).takeWhile(_ != -1).map(_.toChar).mkString
-    // Drop intermediary line
-    body.drop(body.prefixLength(_ != '\n') + 1).trim
-  }
 }

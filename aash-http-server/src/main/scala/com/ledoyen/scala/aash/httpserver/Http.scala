@@ -1,5 +1,6 @@
 package com.ledoyen.scala.aash.httpserver
 
+import ExtendedStringMap._
 import java.util.Date
 import java.util.Locale
 import java.net.URL
@@ -30,15 +31,22 @@ object Http {
     new HttpResponse(request.version, StatusCode.INTERNAL_SERVER_ERROR, body)
   }
 
-  def connect(url: URL, req: HttpRequest): Option[HttpResponse] = {
-    val socket = new Socket(url.getHost, if (url.getPort != -1) url.getPort else 80)
+  def connect(url: URL, req: HttpRequest, followRedirect: Boolean = true): Option[HttpResponse] = {
+    val socket = new Socket(url.getHost, if (url.getPort != -1) url.getPort else url.getDefaultPort)
     try {
       val out = socket.getOutputStream()
-//      val out = new ByteArrayOutputStream
       writeHttpRequest(new PrintWriter(out, true), req, url)
-//      print(out.toString("UTF-8"))
+//      val debugOut = new ByteArrayOutputStream
+//      writeHttpRequest(new PrintWriter(debugOut, true), req, url)
+//      print(debugOut.toString("UTF-8"))
 //      println(Source.fromInputStream(socket.getInputStream).getLines().mkString("\n"))
-      parseResponse(socket.getInputStream)
+      val response = parseResponse(socket.getInputStream)
+      if(followRedirect && response.exists(p => p.code == StatusCode.FOUND || p.code == StatusCode.MOVED_PERMANENTLY)) {
+        val newPath = response.get.headers.getIC("Location").get
+        connect(new URL(newPath), req, false)
+      } else {
+        response
+      }
 //      ???
     } finally {
       socket.close
@@ -61,7 +69,7 @@ object Http {
     out.write(s"Date: ${Http.format(new Date())}\r\n")
     // TODO use the real ${project.version}
     out.write("Server: Aash/0.0.1-SNAPSHOT\r\n");
-    response.headers.foreach(h => out.write(s"$h\r\n"))
+    response.headers.foreach(h => out.write(s"${h._1}: ${h._2}\r\n"))
 
     out.write("\r\n");
     out.write(response.body);
@@ -70,16 +78,19 @@ object Http {
   }
 
   def writeHttpRequest(out: Writer, req: HttpRequest, url: URL): Unit = {
-    val firstLine = s"${req.method} ${req.path} ${req.version}\r\n"
+    val slashPrefixLength = req.path.prefixLength(_ == '/')
+    val slashSuffixLength = url.getPath.reverse.prefixLength(_ == '/')
+    val firstLine = s"${req.method} ${url.getPath.substring(slashSuffixLength)}/${req.path.substring(slashPrefixLength)} ${req.version}\r\n" // .replaceAllLiterally("//", "/")
     out.write(firstLine)
     val host = s"Host: ${url.getHost}\r\n"
     out.write(host)
     val keepAlive = "Connection: keep-alive\r\n"
     out.write(keepAlive)
 
-    req.headers.foreach(h => out.write(s"${h._1}: ${h._2}\r\n"))
+//    req.headers.
+    req.headers.filter((p) => !"Connection".equalsIgnoreCase(p._1) && !"Host".equalsIgnoreCase(p._1) && !"Content-Length".equalsIgnoreCase(p._1)).foreach(h => out.write(s"${h._1}: ${h._2}\r\n"))
 
-    if (req.body != null) {
+    if (req.body != null && req.body.trim != "") {
       out.write(s"Content-Length: ${req.body.length}\r\n")
       out.write("\r\n")
       out.write(req.body)
@@ -98,9 +109,21 @@ object Http {
       val version = firstLineArray(0)
       val code = StatusCode(firstLineArray(1).toInt)
       val headers = HttpUtils.readHeaders(in, Map())
-      val body = HttpUtils.readResponseBody(in, is)
+      val body = readResponseBody(in, is, headers.getIC("Content-Length").map(_.toInt))
 
       Option(new HttpResponse(version, code, body, headers))
     } else None
+  }
+
+  def readResponseBody(in: BufferedReader, is: InputStream, contentLength : Option[Int]): String = {
+    contentLength match {
+      case Some(x) => Stream.continually(in.read).take(x).map(_.toChar).mkString
+      case None => {
+        val body = Stream.continually(in.read).takeWhile(_ != -1).map(_.toChar).mkString
+        // Drop intermediary line
+//        body.drop(body.prefixLength(_ != '\n') + 1).trim
+        body
+      }
+    }
   }
 }
