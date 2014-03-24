@@ -16,8 +16,8 @@ import java.util.concurrent.ThreadPoolExecutor
 import java.net.SocketException
 import java.net.InetAddress
 import org.slf4j.LoggerFactory
-import com.ledoyen.scala.aash.tool.Streams
 import scala.annotation.tailrec
+import com.ledoyen.scala.aash.tool.Options
 
 object HttpServer {
   def logger = LoggerFactory.getLogger("HttpServer")
@@ -66,7 +66,7 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
     if (req.getParameters.get("reset").exists("true" == _)) resetStatistics
     if (req.getParameters.get("enable").exists("true" == _)) enableStatistics
     if (req.getParameters.get("enable").exists("false" == _)) disableStatistics
-    new HttpResponse(req.version, StatusCode.OK, s"Active threads : ${pool.getActiveCount} (${pool.getPoolSize})\r\n${simons.mkString("\r\n")}", List("Content-type: text/plain; charset=UTF-8"))
+    new HttpResponse(req.version, StatusCode.OK, s"Active threads : ${pool.getActiveCount} (${pool.getPoolSize})\r\n${simons.mkString("\r\n")}", Map("Content-type" -> "text/plain; charset=UTF-8"))
   }
 
   class HttpServerThread extends Thread {
@@ -114,7 +114,7 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
 
             val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream)), true)
 
-            val split = Http.option(statActive, SimonManager.getStopwatch(s"HTTP-$port-${request.path.replace("/", "")}").start)
+            val split = Options.option(statActive, SimonManager.getStopwatch(s"HTTP-$port-${request.path.replace("/", "")}").start)
             HttpServer.logger.trace(s"$request")
 
             try {
@@ -122,12 +122,12 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
               listener match {
                 case Some(l) => {
                   request.listenerPath = l._1
-                  HttpUtils.writeResponse(out, l._2(request))
+                  Http.writeHttpResponse(out, l._2(request))
                 }
-                case None => HttpUtils.writeResponse(out, Http.notFound(request))
+                case None => Http.writeHttpResponse(out, Http.notFound(request))
               }
             } catch {
-              case e: Throwable => HttpUtils.writeResponse(out, Http.error(request, e))
+              case e: Throwable => Http.writeHttpResponse(out, Http.error(request, e))
             } finally {
               out.close
               split.foreach(_.stop)

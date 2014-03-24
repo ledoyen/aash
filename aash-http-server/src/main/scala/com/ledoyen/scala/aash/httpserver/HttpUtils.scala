@@ -7,67 +7,63 @@ import java.io.Writer
 import java.util.Date
 import java.io.InputStreamReader
 import java.io.InputStream
-import com.ledoyen.scala.aash.tool.Streams
 import scala.collection.immutable.Stream
+import com.ledoyen.scala.aash.tool.Streams
 
 package object HttpUtils {
 
   def parseRequest(is: InputStream): Option[HttpRequest] = {
-    def readHeaders(in: BufferedReader, acc: Map[String, String]): Map[String, String] = {
-      val line = in.readLine
-      Option(line) match {
-        case Some(x) if !"".equals(x) => {
-          val sp = x.splitAt(x.prefixLength(p => ':' != p))
-          readHeaders(in, acc + (sp._1 -> sp._2.substring(1).trim))
-        }
-        case _ => acc
-      }
-    }
-
     val in = new BufferedReader(new InputStreamReader(is))
     val firstLine = in.readLine
     if (firstLine != null) {
       val firstLineArray = firstLine.split(" ")
-      val pathAndParams = readPath(firstLineArray(1))
-      val headers  = readHeaders(in, Map())
-      val body = readBody(headers, in)
-      
-      Option(new HttpRequest(firstLineArray(0), firstLineArray(2), pathAndParams._1, pathAndParams._2, headers, body))
+      val method = firstLineArray(0)
+      val pathAndParams = readRequestPath(firstLineArray(1))
+      val headers = readHeaders(in, Map())
+      val body = if("POST".equalsIgnoreCase(method)) readRequestBody(headers, in) else ""
+
+      Option(new HttpRequest(method, firstLineArray(2), pathAndParams._1, pathAndParams._2, headers, body))
     } else None
   }
 
-  def readBody(headers: Map[String, String], in: BufferedReader): List[String] = {
-    val contentType = headers.getIC("Content-Length")
-    contentType match {
-        case None => Nil
-        case Some(x) => Stream.continually(in.read).take(x.toInt).map(_.toChar).mkString.split("\\r?\\n").toList
-      }
-  }
-
-  def readPath(p: String): (String, Map[String, String]) = {
+  def readRequestPath(p: String): (String, Map[String, String]) = {
     val sp = p.splitAt(p.prefixLength(x => '?' != x))
-    (sp._1, readPath(sp._2.drop(1), Map()))
+    (sp._1, readRequestPath(sp._2.drop(1), Map()))
   }
 
   @tailrec
-  def readPath(p: String, acc: Map[String, String]): Map[String, String] = {
+  def readRequestPath(p: String, acc: Map[String, String]): Map[String, String] = {
     if (!"".equals(p)) {
       val sp = p.splitAt(p.prefixLength(p => '&' != p))
       val v = sp._1.splitAt(p.prefixLength(p => '=' != p))
-      readPath(sp._2.drop(1), acc + (v._1 -> v._2.drop(1)))
+      readRequestPath(sp._2.drop(1), acc + (v._1 -> v._2.drop(1)))
     } else acc
   }
 
-  def writeResponse(out: Writer, response: HttpResponse): Unit = {
-    out.write(s"${response.version} ${response.code.id} ${response.code.toString}\r\n")
-    out.write(s"Date: ${Http.format(new Date())}\r\n")
-    // TODO use the real ${project.version}
-    out.write("Server: Aash/0.0.1-SNAPSHOT\r\n");
-    response.headers.foreach(h => out.write(s"$h\r\n"))
+  @tailrec
+  def readHeaders(in: BufferedReader, acc: Map[String, String]): Map[String, String] = {
+    val line = in.readLine
+    Option(line) match {
+      case Some(x) if !"".equals(x) => {
+        val sp = x.splitAt(x.prefixLength(p => ':' != p))
+        readHeaders(in, acc + (sp._1 -> sp._2.substring(1).trim))
+      }
+      case _ => acc
+    }
+  }
 
-    out.write("\r\n");
-    out.write(response.body);
+  def readRequestBody(headers: Map[String, String], in: BufferedReader): String = {
+    val contentType = headers.getIC("Content-Length")
+    contentType match {
+      case None => Stream.continually(in.read).takeWhile(_ != -1).map(_.toChar).mkString
+      case Some(x) => Stream.continually(in.read).take(x.toInt).map(_.toChar).mkString
+    }
+  }
 
-    out.flush
+  def readResponseBody(in: BufferedReader, is: InputStream): String = {
+//    val body = Streams.continually(in.read, is.available != 0).map(_.toChar).mkString
+    val body = Stream.continually(in.read).takeWhile(_ != -1).map(_.toChar).mkString
+    // Drop intermediary line
+    body.drop(body.prefixLength(_ != '\n') + 1).trim
   }
 }

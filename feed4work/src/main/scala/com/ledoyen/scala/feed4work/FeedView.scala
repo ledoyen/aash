@@ -39,7 +39,7 @@ class FeedView(val server: HttpServer, val feedSource: FeedSource, val path: Str
     
     def contentType: String = if(FeedType.RSS == feedType) "application/rss+xml" else "application/atom+xml"
 
-    new HttpResponse(req.version, StatusCode.OK, s"<?xml version='1.0' encoding='UTF-8' ?>\r\n${body.toString}", List(s"Content-Type: $contentType;charset=utf-8"))
+    new HttpResponse(req.version, StatusCode.OK, s"<?xml version='1.0' encoding='UTF-8' ?>\r\n${body.toString}", Map("Content-Type" -> s"$contentType;charset=utf-8"))
   }
 }
 
