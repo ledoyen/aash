@@ -15,8 +15,8 @@ object MailConnector {
   }
 }
 
-class MailConnector(val host: String, val port: Option[Int] = None, val protocol: String, override val cron: Cron,
-    val login: String, val password: String, val tag: String = "MAIL", val link: String = "") extends Connector(cron) {
+class MailConnector(val host: String, val port: Option[Int] = None, val protocol: String, val cron: Cron,
+    val login: String, val password: String, val tag: String = "MAIL", val link: String = "") extends Connector(Option(cron)) {
 
   var lastMail = ("", 0l)
 
@@ -41,7 +41,7 @@ class MailConnector(val host: String, val port: Option[Int] = None, val protocol
     for(message <- messages) {
       val date = MailConnector.getDate(message)
       if(lastMail._2 < date.getTime || (lastMail._2 == date.getTime && lastMail._1 != message.getSubject)) {
-        feedSource.push(MailConnector.buildFeed(message, tag, link))
+        feedSource.foreach(_.push(MailConnector.buildFeed(message, tag, link)))
         lastMail = (message.getSubject, date.getTime)
       }
     }

@@ -16,10 +16,10 @@ object Feed4Work {
 
   def main(args: Array[String]) {
     val sourceFolderPath = Option(System.getProperty("feed4work.source.folder"))
-    		.getOrElse(s"${System.getProperty("user.home")}${System.getProperty("file.separator")}.feed4work")
+      .getOrElse(s"${System.getProperty("user.home")}${System.getProperty("file.separator")}.feed4work")
     val port = Option(System.getProperty("feed4work.server.port")).map(_.toInt).getOrElse(80)
 
-    val server = new Feed4Work (port, sourceFolderPath).start
+    val server = new Feed4Work(port, new FileFeedSource(FileFeedSource.resolveSourceFolder(sourceFolderPath))).start
     try {
       if (Option(System.getProperty("feed4work.server.statistics.enabled")).exists("true" == _)) {
         server.enableStatistics
@@ -32,59 +32,31 @@ object Feed4Work {
       }
     }
   }
-
-  private def resolveSourceFolder(path: String) = {
-    val sourceFolder = Paths.get(path).toFile
-    if (sourceFolder.exists && !sourceFolder.isDirectory()) throw new IllegalArgumentException(s"Feed source path [$path] is not a directory")
-    if (!sourceFolder.exists) sourceFolder.mkdirs
-    sourceFolder
-  }
 }
 
-class Feed4Work(override val port: Int = 80, val sourceFolderPath: String = Feed4Work.defaultSourceFolderPath, val rssPath: String = "/rss") extends HttpServer(port) {
+class Feed4Work(override val port: Int = 80, val feedSource: FeedSource, val rssPath: String = "/rss") extends HttpServer(port) {
+  import scala.collection.{ mutable, immutable, generic }
 
-  val feedSource = new FeedSource(Feed4Work.resolveSourceFolder(sourceFolderPath))
-
-  val connectors: List[Connector] = List(
-      new JenkinsConnector(
-          adress = "https://jenkins.megalo-company.com",
-          cron = "every 30 seconds".cron,
-          login = System.getProperty("feed4work.server.jenkins.login"),
-          password = System.getProperty("feed4work.server.jenkins.password"))
-      , new MailConnector(
-          tag = "OUTLOOK",
-          host = "outlook.office365.com",
-          link = "http://google.com",
-          port = Option(995),
-          protocol = "pop3s",
-          cron = "every 10 minutes".cron,
-          login = System.getProperty("feed4work.server.outlook.login"),
-          password = System.getProperty("feed4work.server.outlook.password"))
-      , new MailConnector(
-          tag = "GMAIL",
-          host = "imap.gmail.com",
-          link = "http://google.com",
-          protocol = "imaps",
-          cron = "every 3 minutes".cron,
-          login = System.getProperty("feed4work.server.gmail.login"),
-          password = System.getProperty("feed4work.server.gmail.password"))
-      )
+  val connectors: mutable.Map[String, Connector] = mutable.Map()
 
   override def start = {
     super.start
     new FeedView(this, feedSource, "/rss", FeedType.RSS).selfRegister
     new FeedView(this, feedSource, "/atom", FeedType.ATOM).selfRegister
-
-    connectors.foreach(_.connect(feedSource))
-    connectors.foreach(_.start)
     this
   }
 
   override def stop = {
-	super.stop
+    super.stop
     Scheduled.shutdown
     Http.shutdown
   }
 
   def push(feed: Feed) = feedSource.push(feed)
+
+  def registerConnector(name: String, connector: Connector): Connector = {
+    connectors += (name -> connector)
+    connector.connect(feedSource)
+    connector.start
+  }
 }

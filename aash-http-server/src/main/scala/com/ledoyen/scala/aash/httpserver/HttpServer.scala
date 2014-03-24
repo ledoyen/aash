@@ -39,6 +39,7 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
 
   private val serverThread = new HttpServerThread
   private val pathListeners: mutable.Map[String, HttpHandler] = mutable.Map()
+  private val shutdownHooks: mutable.MutableList[() => Unit] = mutable.MutableList()
   private var statActive = false
 
   private def simons = SimonManager.getRootSimon().getChildren()
@@ -48,9 +49,14 @@ class HttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.ne
     HttpServer.this
   }
 
-  def stop = serverThread.stopServer
+  def stop = {
+    serverThread.stopServer
+    shutdownHooks.foreach(p => p())
+  }
 
   def registerListener(path: String, listener: HttpHandler): Unit = pathListeners += (path -> listener)
+
+  def registerShutdownHook(hook: () => Unit): Unit = shutdownHooks += hook
 
   def enableStatistics: Unit = {
     HttpServer.logger.debug("Statistics enabled")

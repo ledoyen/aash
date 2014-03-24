@@ -44,7 +44,7 @@ object JenkinsConnector {
   def buildFeed(build: Build, tag: String): Feed = new Feed(s"[$tag] [${build.result}] ${build.name} in ${Durations.format(build.duration)}", build.url, new Date(build.timestamp), "")
 }
 
-class JenkinsConnector(val adress: String, override val cron: Cron, val login: String = null, val password: String = "", val tag: String = "JENKINS") extends Connector(cron) {
+class JenkinsConnector(val adress: String, val cron: Cron, val login: String = null, val password: String = "", val tag: String = "JENKINS") extends Connector(Option(cron)) {
   import scala.collection.{ mutable, immutable, generic }
   import dispatch._
 import dispatch.Defaults._
@@ -82,7 +82,7 @@ import dispatch.Defaults._
         if (!build.building) {
           if (!histo.contains(build.name) || histo(build.name) != build.timestamp) {
             histo += (build.name -> build.timestamp)
-            feedSource.push(JenkinsConnector.buildFeed(build, tag))
+            feedSource.foreach(_.push(JenkinsConnector.buildFeed(build, tag)))
           }
         }
         //        if (!histo.contains(build.name)) {
