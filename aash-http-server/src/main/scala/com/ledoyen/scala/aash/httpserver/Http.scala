@@ -47,7 +47,6 @@ object Http {
       } else {
         response
       }
-//      ???
     } finally {
       socket.close
     }
@@ -87,7 +86,6 @@ object Http {
     val keepAlive = "Connection: keep-alive\r\n"
     out.write(keepAlive)
 
-//    req.headers.
     req.headers.filter((p) => !"Connection".equalsIgnoreCase(p._1) && !"Host".equalsIgnoreCase(p._1) && !"Content-Length".equalsIgnoreCase(p._1)).foreach(h => out.write(s"${h._1}: ${h._2}\r\n"))
 
     if (req.body != null && req.body.trim != "") {
@@ -120,8 +118,6 @@ object Http {
       case Some(x) => Stream.continually(in.read).take(x).map(_.toChar).mkString
       case None => {
         val body = Stream.continually(in.read).takeWhile(_ != -1).map(_.toChar).mkString
-        // Drop intermediary line
-//        body.drop(body.prefixLength(_ != '\n') + 1).trim
         body
       }
     }

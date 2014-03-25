@@ -47,8 +47,7 @@ object JenkinsConnector {
 class JenkinsConnector(val adress: String, val cron: Cron, val login: String = null, val password: String = "", val tag: String = "JENKINS") extends Connector(Option(cron)) {
   import scala.collection.{ mutable, immutable, generic }
   import dispatch._
-import dispatch.Defaults._
-
+  import dispatch.Defaults._
 
   private val histo: mutable.Map[String, Long] = mutable.Map()
 
@@ -67,8 +66,8 @@ import dispatch.Defaults._
         }
       }
       case Left(e) => {
-        val duration = System.currentTimeMillis() - startDate
-        JenkinsConnector.logger.trace(s"KO in ${duration} ms  KO (${e.getMessage()})")
+        val duration = System.currentTimeMillis - startDate
+        JenkinsConnector.logger.trace(s"KO in ${duration} ms  KO (${e.getMessage})")
       }
     }
   }

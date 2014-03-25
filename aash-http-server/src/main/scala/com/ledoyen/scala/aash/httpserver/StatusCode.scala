@@ -13,7 +13,7 @@ object StatusCode extends Enumeration {
   // 4xx
   val BAD_REQUEST = Value(400, "Bad Request")
   val UNAUTHORIZED = Value(401, "Unauthorized")
-  val FORBIDDEN  =Value(403, "Forbidden")
+  val FORBIDDEN = Value(403, "Forbidden")
   val NOT_FOUND = Value(404, "Not Found")
 
   // 5xx

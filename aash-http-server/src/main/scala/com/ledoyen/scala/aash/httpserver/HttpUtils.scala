@@ -20,7 +20,7 @@ package object HttpUtils {
       val method = firstLineArray(0)
       val pathAndParams = readRequestPath(firstLineArray(1))
       val headers = readHeaders(in, Map())
-      val body = if("POST".equalsIgnoreCase(method)) readRequestBody(headers, in) else ""
+      val body = if ("POST".equalsIgnoreCase(method)) readRequestBody(headers, in) else ""
 
       Option(new HttpRequest(method, firstLineArray(2), pathAndParams._1, pathAndParams._2, headers, body))
     } else None
