@@ -23,7 +23,11 @@ trait HttpServer {
 
   val url: String
 
-  type HttpHandler = HttpRequest => HttpResponse
+  type HttpHandler
+
+  type SyncHttpHandler = HttpRequest => HttpResponse
+
+  type AsyncHttpHandler = (HttpRequest, WriteCallback) => Unit
 
   protected val pathListeners: mutable.Map[String, HttpHandler] = mutable.Map()
   protected val shutdownHooks: mutable.MutableList[() => Unit] = mutable.MutableList()
@@ -35,7 +39,16 @@ trait HttpServer {
 
   def stop: Unit
 
-  def registerListener(path: String, listener: HttpHandler): Unit = pathListeners += (path -> listener)
+  def statistics: SyncHttpHandler = (req: HttpRequest) => {
+    if (req.getParameters.get("reset").exists("true" == _)) resetStatistics
+    if (req.getParameters.get("enable").exists("true" == _)) enableStatistics
+    if (req.getParameters.get("enable").exists("false" == _)) disableStatistics
+    new HttpResponse(req.version, StatusCode.OK, s"Active threads : ${Thread.activeCount} \r\n${simons.mkString("\r\n")}", Map("Content-type" -> "text/plain; charset=UTF-8"))
+  }
+
+  def registerAppropriateListener(path: String, listener: HttpHandler): Unit = pathListeners += (path -> listener)
+  
+  def registerListener(path: String, listener: SyncHttpHandler)
 
   def registerShutdownHook(hook: () => Unit): Unit = shutdownHooks += hook
 
@@ -50,10 +63,14 @@ trait HttpServer {
 
   def resetStatistics: Unit = simons.foreach(_.reset)
 
-  def statistics: HttpRequest => HttpResponse = (req: HttpRequest) => {
-    if (req.getParameters.get("reset").exists("true" == _)) resetStatistics
-    if (req.getParameters.get("enable").exists("true" == _)) enableStatistics
-    if (req.getParameters.get("enable").exists("false" == _)) disableStatistics
-    new HttpResponse(req.version, StatusCode.OK, s"Active threads : ${Thread.activeCount} \r\n${simons.mkString("\r\n")}", Map("Content-type" -> "text/plain; charset=UTF-8"))
-  }
+  //  def statistics: HttpRequest => HttpResponse = (req: HttpRequest) => {
+  //    if (req.getParameters.get("reset").exists("true" == _)) resetStatistics
+  //    if (req.getParameters.get("enable").exists("true" == _)) enableStatistics
+  //    if (req.getParameters.get("enable").exists("false" == _)) disableStatistics
+  //    new HttpResponse(req.version, StatusCode.OK, s"Active threads : ${Thread.activeCount} \r\n${simons.mkString("\r\n")}", Map("Content-type" -> "text/plain; charset=UTF-8"))
+  //  }
+}
+
+trait WriteCallback {
+  def write(response: HttpResponse)
 }

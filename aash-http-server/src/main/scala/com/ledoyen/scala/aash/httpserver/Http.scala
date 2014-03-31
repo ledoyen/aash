@@ -29,9 +29,9 @@ object Http {
     new HttpResponse(request.version, StatusCode.NOT_FOUND, "<TITLE>404 - NOT FOUND</TITLE>\r\n<P>Content cannot be found</P>")
   }
 
-  def error(request: HttpRequest, e: Throwable): HttpResponse = {
+  def error(e: Throwable): HttpResponse = {
     val body = s"<TITLE>500 - INTERNAL SERVER ERROR</TITLE>\r\n <p><b>${e.getClass.getName} ${e.getMessage}</b></p><p>${e.getStackTrace() mkString ("</p>\r\n<p>")}</p>"
-    new HttpResponse(request.version, StatusCode.INTERNAL_SERVER_ERROR, body)
+    new HttpResponse("HTTP/1.1", StatusCode.INTERNAL_SERVER_ERROR, body)
   }
 
   def connect(url: URL, req: HttpRequest, followRedirect: Boolean = true): Option[HttpResponse] = {
@@ -118,7 +118,7 @@ object Http {
     }
   }
 
-  def getListener(pathListeners: mutable.Map[String, HttpHandler], path: String): Option[(String, HttpRequest => HttpResponse)] = {
+  def getListener[T](pathListeners: mutable.Map[String, T], path: String): Option[(String, T)] = {
     pathListeners.filter(tuple => path.startsWith(tuple._1)).headOption
   }
 }

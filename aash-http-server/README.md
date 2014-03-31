@@ -21,7 +21,7 @@ What we call controllers, are in fact functions transforming an `com.ledoyen.sca
 ```scala
 val server = HttpServer.sync.start
 server.registerListener("/hello",
-	req => new HttpResponse(req.version, StatusCode.OK, "<h1>Hello World !</h1>"))
+	req => HttpResponse(req.version, StatusCode.OK, "<h1>Hello World !</h1>"))
 ```
 
 ## Statistics
@@ -58,7 +58,19 @@ server.resetStatistics
 ## Asynchronous IO
 
 Aash HTTP Server provides also (in beta phase for now) an asynchronous implementation, using [AsynchronousServerSocketChannel](http://docs.oracle.com/javase/7/docs/api/java/nio/channels/AsynchronousServerSocketChannel.html).
+This server works with a single thread handling HTTP read / write and other treatments you may want to run between.
+This implementation is meant to be used with asynchronous IO or immediate computation.
+If any treatment is hanging (SQL request for example), the server will not be able to treat more than the current connexion.
 
 ```scala
 val server = HttpServer.async.start
+// Synchronous version, "emulate" Sync server behavior, for simple and fast computations
+server.registerListener("/hello",
+	req => HttpResponse(req.version, StatusCode.OK, "<h1>Hello World !</h1>"))
+// Asynchronous version (example with some file reading)
+server.registerAsyncListener("/file",
+      (req, callback) => {
+        AsyncFiles.read(Paths.get("somefile"),
+            content => callback.write(HttpResponse(req.version, StatusCode.OK, content)))
+      })
 ```

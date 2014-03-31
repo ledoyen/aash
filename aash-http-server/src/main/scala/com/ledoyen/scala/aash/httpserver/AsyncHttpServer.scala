@@ -22,6 +22,9 @@ import org.javasimon.SimonManager
 import com.ledoyen.scala.aash.tool.Options
 import org.javasimon.Split
 import java.net.InetAddress
+import java.nio.channels.spi.AsynchronousChannelProvider
+import sun.nio.ch.ThreadPool
+import sun.nio.ch.AsynchronousChannelGroupImpl
 
 /**
  * http://openjdk.java.net/projects/nio/presentations/TS-4222.pdf
@@ -33,24 +36,41 @@ object AsyncHttpServer {
 
 class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.newCachedThreadPool.asInstanceOf[ThreadPoolExecutor]) extends HttpServer {
 
+  type HttpHandler = AsyncHttpHandler
+
   val url = s"${InetAddress.getLocalHost}:$port/"
 
-  private val serverThread = new AsyncHttpServerImpl
+  private val serverImplementation = new AsyncHttpServerImpl
 
   def start = {
-    serverThread.run
+    serverImplementation.run
     AsyncHttpServer.this
   }
 
   def stop = {
-    serverThread.stopServer
+    serverImplementation.stopServer
     shutdownHooks.foreach(p => p())
   }
 
+  def registerListener(path: String, listener: SyncHttpHandler): Unit = {
+    registerAppropriateListener(path, (req: HttpRequest, callback: WriteCallback) => callback.write(listener(req)))
+  }
+
+  def registerAsyncListener(path: String, listener: AsyncHttpHandler): Unit = {
+    registerAppropriateListener(path, listener)
+  }
+
   class AsyncHttpServerImpl {
+    import scala.reflect.runtime.universe._
+    import scala.reflect.runtime.currentMirror
+    import scala.reflect.runtime.{universe => ru}
+
     HttpServer.logger.debug(s"Starting Async HTTP Server on port [$port]")
-    val group = AsynchronousChannelGroup.withFixedThreadPool(1, new NonDaemonThreadFactory)
+    val group = AsynchronousChannelGroup.withFixedThreadPool(1, new EventLoopThreadFactory)
+    
     val ssc = AsynchronousServerSocketChannel.open(group).bind(new InetSocketAddress("localhost", port))
+
+    def eventLoopThreadGroup = group
 
     def run = {
       if (ssc.isOpen) {
@@ -116,17 +136,16 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
               case Some(request) => {
                 val split = Options.option(statActive, SimonManager.getStopwatch(s"HTTP-$port-${request.path.replace("/", "")}").start)
                 HttpServer.logger.trace(s"$request")
-                val listener = Http.getListener(pathListeners, request.path)
-                val response = listener match {
+                // If any async listener is registered
+                val asyncListener = Http.getListener(pathListeners, request.path)
+                asyncListener match {
                   case Some(l) => {
                     request.listenerPath = l._1
-                    l._2(request)
+                    l._2(request, new WriteCallBackImpl(asc, split))
+                  } case None => {
+                    Http.notFound(request)
                   }
-                  case None => Http.notFound(request)
                 }
-
-                val sendingBuffer = ByteBuffer.wrap(response.toHttpLiteral.getBytes)
-                asc.write(sendingBuffer, split, new WriteCompletionHandler(asc, sendingBuffer))
               }
             }
           }
@@ -134,7 +153,10 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
           case e: Exception => failed(e, nothing)
         }
       }
-      def failed(exception: Throwable, nothing: Void) = ???
+      def failed(exception: Throwable, nothing: Void) = {
+        HttpServer.logger.warn("Unable to read from socket", exception)
+        new WriteCallBackImpl(asc, None).write(Http.error(exception))
+      }
     }
   }
 
@@ -157,9 +179,16 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
     }
   }
 
-  class NonDaemonThreadFactory extends ThreadFactory {
+  class EventLoopThreadFactory extends ThreadFactory {
     def newThread(r: Runnable): Thread = {
       new Thread(r, "Event Loop Thread")
+    }
+  }
+
+  private class WriteCallBackImpl(asc: AsynchronousSocketChannel, split: Option[Split]) extends WriteCallback {
+    def write(response: HttpResponse) = {
+      val sendingBuffer = ByteBuffer.wrap(response.toHttpLiteral.getBytes)
+      asc.write(sendingBuffer, split, new WriteCompletionHandler(asc, sendingBuffer))
     }
   }
 }

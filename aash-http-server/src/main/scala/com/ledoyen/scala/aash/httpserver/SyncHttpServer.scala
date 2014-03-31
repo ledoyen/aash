@@ -32,6 +32,8 @@ object SyncHttpServer {
 
 class SyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.newCachedThreadPool.asInstanceOf[ThreadPoolExecutor]) extends HttpServer {
 
+  type HttpHandler = SyncHttpHandler
+
   val url = s"${InetAddress.getLocalHost}:$port/"
 
   private val serverThread = new SyncHttpServerThread
@@ -46,10 +48,12 @@ class SyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executor
     shutdownHooks.foreach(p => p())
   }
 
-  override def statistics: HttpRequest => HttpResponse = (req: HttpRequest) => {
-    if (req.getParameters.get("reset").exists("true" == _)) resetStatistics
-    if (req.getParameters.get("enable").exists("true" == _)) enableStatistics
-    if (req.getParameters.get("enable").exists("false" == _)) disableStatistics
+  def registerListener(path: String, listener: SyncHttpHandler): Unit = {
+    registerAppropriateListener(path, listener)
+  }
+
+  override def statistics: SyncHttpHandler = (req: HttpRequest) => {
+    super.statistics
     new HttpResponse(req.version, StatusCode.OK, s"Active threads : ${pool.getActiveCount} (${pool.getPoolSize})\r\n${simons.mkString("\r\n")}", Map("Content-type" -> "text/plain; charset=UTF-8"))
   }
 
@@ -107,7 +111,7 @@ class SyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executor
                 case None => Http.writeHttpResponse(out, Http.notFound(request))
               }
             } catch {
-              case e: Throwable => Http.writeHttpResponse(out, Http.error(request, e))
+              case e: Throwable => Http.writeHttpResponse(out, Http.error(e))
             } finally {
               out.close
               split.foreach(_.stop)
