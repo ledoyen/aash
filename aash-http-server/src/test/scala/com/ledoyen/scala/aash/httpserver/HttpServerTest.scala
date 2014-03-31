@@ -10,12 +10,21 @@ import com.gargoylesoftware.htmlunit.TextPage
 class HttpServerTest {
 
   @Test
-  def testListeningServer = {
-    val server = new HttpServer(8080).start
+  def testSyncHttpServer = {
+   testHttpServer(new SyncHttpServer(8080).start)
+  }
+
+  @Test
+  def testAsyncHttpServer = {
+   testHttpServer(new AsyncHttpServer(8080).start)
+  }
+
+  def testHttpServer(server: HttpServer) = {
     server.enableStatistics
     server.registerListener("/toto", (req: HttpRequest) => new HttpResponse(req.version, StatusCode.OK, "<h1>TOTO !</h1>"))
     server.registerListener("/titi", (req: HttpRequest) => new HttpResponse(req.version, StatusCode.OK, "<h1>TITI !</h1>"))
     server.registerListener("/stat", server.statistics)
+    server.registerShutdownHook(() => println("exit hook"))
 
     val webClient = new WebClient
 

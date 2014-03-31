@@ -1,0 +1,165 @@
+package com.ledoyen.scala.aash.httpserver
+
+import scala.collection.JavaConversions._
+import scala.collection.{ mutable, immutable, generic }
+import org.slf4j.LoggerFactory
+import java.nio.channels.AsynchronousServerSocketChannel
+import java.net.InetSocketAddress
+import java.nio.channels.CompletionHandler
+import java.nio.channels.AsynchronousSocketChannel
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.Executors
+import java.nio.channels.AsynchronousChannelGroup
+import java.util.concurrent.ThreadFactory
+import java.nio.channels.AsynchronousCloseException
+import java.nio.ByteBuffer
+import java.nio.charset.CharsetDecoder
+import java.nio.charset.Charset
+import scala.collection.mutable.StringBuilder
+import java.nio.charset.CharacterCodingException
+import java.io.ByteArrayInputStream
+import org.javasimon.SimonManager
+import com.ledoyen.scala.aash.tool.Options
+import org.javasimon.Split
+import java.net.InetAddress
+
+/**
+ * http://openjdk.java.net/projects/nio/presentations/TS-4222.pdf
+ */
+object AsyncHttpServer {
+
+  val BUFFER_SIZE = 1024
+}
+
+class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executors.newCachedThreadPool.asInstanceOf[ThreadPoolExecutor]) extends HttpServer {
+
+  val url = s"${InetAddress.getLocalHost}:$port/"
+
+  private val serverThread = new AsyncHttpServerImpl
+
+  def start = {
+    serverThread.run
+    AsyncHttpServer.this
+  }
+
+  def stop = {
+    serverThread.stopServer
+    shutdownHooks.foreach(p => p())
+  }
+
+  class AsyncHttpServerImpl {
+    HttpServer.logger.debug(s"Starting Async HTTP Server on port [$port]")
+    val group = AsynchronousChannelGroup.withFixedThreadPool(1, new NonDaemonThreadFactory)
+    val ssc = AsynchronousServerSocketChannel.open(group).bind(new InetSocketAddress("localhost", port))
+
+    def run = {
+      if (ssc.isOpen) {
+        try {
+          ssc.accept(ssc, new SocketCompletionHandler)
+        } catch {
+          case e: Exception => e.printStackTrace
+        }
+      }
+    }
+
+    def stopServer: Unit = {
+      HttpServer.logger.debug("Stoping server...")
+      ssc.close
+      group.shutdown
+    }
+  }
+
+  class SocketCompletionHandler extends CompletionHandler[AsynchronousSocketChannel, AsynchronousServerSocketChannel] {
+    def completed(asc: AsynchronousSocketChannel, ssc: AsynchronousServerSocketChannel) {
+      val buffer = ByteBuffer.allocate(AsyncHttpServer.BUFFER_SIZE)
+      val rch = new ReadCompletionHandler(asc, buffer, Charset.forName("UTF-8").newDecoder)
+      asc.read(buffer, null, rch)
+      if (ssc.isOpen) {
+        ssc.accept(ssc, new SocketCompletionHandler)
+      }
+
+    }
+
+    def failed(exception: Throwable, ssc: AsynchronousServerSocketChannel) {
+      if (ssc.isOpen) {
+        ssc.accept(ssc, new SocketCompletionHandler)
+      }
+      exception match {
+        case e: AsynchronousCloseException => // Do nothing, server have been stopped, so channel have been closed
+        case _ => {
+          println("Ohohohoh")
+          exception.printStackTrace
+        }
+      }
+    }
+
+    class ReadCompletionHandler(asc: AsynchronousSocketChannel, buffer: ByteBuffer, decoder: CharsetDecoder) extends CompletionHandler[Integer, Void] {
+      var acc = ""
+      def completed(bytes: Integer, nothing: Void): Unit = {
+        if (!asc.isOpen) return
+        try {
+          buffer.flip
+          decoder.reset
+          val part = decoder.decode(buffer).toString
+          acc = acc + part
+          buffer.clear
+
+          // More data to be read
+          if (bytes != -1 && bytes == AsyncHttpServer.BUFFER_SIZE) {
+            asc.read(buffer, null, this)
+          } else {
+            asc.shutdownInput
+            val optionalRequest = HttpUtils.parseRequest(new ByteArrayInputStream(acc.toString.getBytes))
+            optionalRequest match {
+              case None =>
+                asc.close; return
+              case Some(request) => {
+                val split = Options.option(statActive, SimonManager.getStopwatch(s"HTTP-$port-${request.path.replace("/", "")}").start)
+                HttpServer.logger.trace(s"$request")
+                val listener = Http.getListener(pathListeners, request.path)
+                val response = listener match {
+                  case Some(l) => {
+                    request.listenerPath = l._1
+                    l._2(request)
+                  }
+                  case None => Http.notFound(request)
+                }
+
+                val sendingBuffer = ByteBuffer.wrap(response.toHttpLiteral.getBytes)
+                asc.write(sendingBuffer, split, new WriteCompletionHandler(asc, sendingBuffer))
+              }
+            }
+          }
+        } catch {
+          case e: Exception => failed(e, nothing)
+        }
+      }
+      def failed(exception: Throwable, nothing: Void) = ???
+    }
+  }
+
+  class WriteCompletionHandler(asc: AsynchronousSocketChannel, buffer: ByteBuffer) extends CompletionHandler[Integer, Option[Split]] {
+    def completed(bytes: Integer, split: Option[Split]): Unit = {
+      if (!asc.isOpen) return
+      if (buffer.hasRemaining()) {
+        asc.write(buffer, null, this)
+      } else {
+        split.foreach(_.stop)
+        asc.shutdownOutput
+        asc.close
+      }
+    }
+    def failed(exception: Throwable, split: Option[Split]) = {
+      HttpServer.logger.warn("Unable to compete writing", exception)
+      split.foreach(_.stop)
+      asc.shutdownOutput
+      asc.close
+    }
+  }
+
+  class NonDaemonThreadFactory extends ThreadFactory {
+    def newThread(r: Runnable): Thread = {
+      new Thread(r, "Event Loop Thread")
+    }
+  }
+}

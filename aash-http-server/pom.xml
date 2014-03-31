@@ -111,7 +111,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>com.ledoyen.scala.httpserver.HttpServer</mainClass>
+							<mainClass>com.ledoyen.scala.aash.httpserver.SyncHttpServer</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

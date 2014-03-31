@@ -13,8 +13,11 @@ import java.io.PrintWriter
 import scala.io.Source
 import java.io.InputStream
 import java.io.ByteArrayOutputStream
+import scala.collection.{ mutable, immutable, generic }
 
 object Http {
+
+  type HttpHandler = HttpRequest => HttpResponse
 
   val HTTP_DATE_FORMAT = new java.text.SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH)
 
@@ -36,12 +39,12 @@ object Http {
     try {
       val out = socket.getOutputStream()
       writeHttpRequest(new PrintWriter(out, true), req, url)
-//      val debugOut = new ByteArrayOutputStream
-//      writeHttpRequest(new PrintWriter(debugOut, true), req, url)
-//      print(debugOut.toString("UTF-8"))
-//      println(Source.fromInputStream(socket.getInputStream).getLines().mkString("\n"))
+      //      val debugOut = new ByteArrayOutputStream
+      //      writeHttpRequest(new PrintWriter(debugOut, true), req, url)
+      //      print(debugOut.toString("UTF-8"))
+      //      println(Source.fromInputStream(socket.getInputStream).getLines().mkString("\n"))
       val response = parseResponse(socket.getInputStream)
-      if(followRedirect && response.exists(p => p.code == StatusCode.FOUND || p.code == StatusCode.MOVED_PERMANENTLY)) {
+      if (followRedirect && response.exists(p => p.code == StatusCode.FOUND || p.code == StatusCode.MOVED_PERMANENTLY)) {
         val newPath = response.get.headers.getIC("Location").get
         connect(new URL(newPath), req, false)
       } else {
@@ -64,15 +67,7 @@ object Http {
   }
 
   def writeHttpResponse(out: Writer, response: HttpResponse): Unit = {
-    out.write(s"${response.version} ${response.code.id} ${response.code.toString}\r\n")
-    out.write(s"Date: ${Http.format(new Date())}\r\n")
-    // TODO use the real ${project.version}
-    out.write("Server: Aash/0.0.1-SNAPSHOT\r\n");
-    response.headers.foreach(h => out.write(s"${h._1}: ${h._2}\r\n"))
-
-    out.write("\r\n");
-    out.write(response.body);
-
+    out.write(response.toHttpLiteral)
     out.flush
   }
 
@@ -113,7 +108,7 @@ object Http {
     } else None
   }
 
-  def readResponseBody(in: BufferedReader, is: InputStream, contentLength : Option[Int]): String = {
+  def readResponseBody(in: BufferedReader, is: InputStream, contentLength: Option[Int]): String = {
     contentLength match {
       case Some(x) => Stream.continually(in.read).take(x).map(_.toChar).mkString
       case None => {
@@ -121,5 +116,9 @@ object Http {
         body
       }
     }
+  }
+
+  def getListener(pathListeners: mutable.Map[String, HttpHandler], path: String): Option[(String, HttpRequest => HttpResponse)] = {
+    pathListeners.filter(tuple => path.startsWith(tuple._1)).headOption
   }
 }

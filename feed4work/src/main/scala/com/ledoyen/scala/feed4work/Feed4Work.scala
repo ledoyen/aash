@@ -34,7 +34,7 @@ object Feed4Work {
   }
 }
 
-class Feed4Work(override val port: Int = 80, val feedSource: FeedSource, val rssPath: String = "/rss") extends HttpServer(port) {
+class Feed4Work(override val port: Int = 80, val feedSource: FeedSource, val rssPath: String = "/rss") extends SyncHttpServer(port) {
   import scala.collection.{ mutable, immutable, generic }
 
   val connectors: mutable.Map[String, Connector] = mutable.Map()

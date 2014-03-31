@@ -19,7 +19,7 @@ To make the server fits your needs, it allows you to bind paths to controllers.
 What we call controllers, are in fact functions transforming an `com.ledoyen.scala.httpserver.HttpRequest` into an `com.ledoyen.scala.httpserver.HttpResponse`.
 
 ```scala
-val server = new HttpServer().start
+val server = HttpServer.sync.start
 server.registerListener("/hello",
 	req => new HttpResponse(req.version, StatusCode.OK, "<h1>Hello World !</h1>"))
 ```
@@ -53,4 +53,12 @@ server.registerListener("/stat", server.statistics)
 server.enableStatistics
 server.disableStatistics
 server.resetStatistics
+```
+
+## Asynchronous IO
+
+Aash HTTP Server provides also (in beta phase for now) an asynchronous implementation, using [AsynchronousServerSocketChannel](http://docs.oracle.com/javase/7/docs/api/java/nio/channels/AsynchronousServerSocketChannel.html).
+
+```scala
+val server = HttpServer.async.start
 ```
