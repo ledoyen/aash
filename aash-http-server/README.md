@@ -58,8 +58,11 @@ server.resetStatistics
 ## Asynchronous IO
 
 Aash HTTP Server provides also (in beta phase for now) an asynchronous implementation, using [AsynchronousServerSocketChannel](http://docs.oracle.com/javase/7/docs/api/java/nio/channels/AsynchronousServerSocketChannel.html).
+
 This server works with a single thread handling HTTP read / write and other treatments you may want to run between.
+
 This implementation is meant to be used with asynchronous IO or immediate computation.
+
 If any treatment is hanging (SQL request for example), the server will not be able to treat more than the current connexion.
 
 ```scala
