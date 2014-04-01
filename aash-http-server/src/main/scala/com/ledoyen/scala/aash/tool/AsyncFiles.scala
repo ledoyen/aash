@@ -1,4 +1,5 @@
 package com.ledoyen.scala.aash.tool
+
 import scala.collection.JavaConversions._
 import java.nio.file.Path
 import java.nio.channels.AsynchronousFileChannel

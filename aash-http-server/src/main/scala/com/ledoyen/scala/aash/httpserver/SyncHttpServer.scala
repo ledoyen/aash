@@ -108,7 +108,7 @@ class SyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executor
                   request.listenerPath = l._1
                   Http.writeHttpResponse(out, l._2(request))
                 }
-                case None => Http.writeHttpResponse(out, Http.notFound(request))
+                case None => Http.writeHttpResponse(out, Http.notFound)
               }
             } catch {
               case e: Throwable => Http.writeHttpResponse(out, Http.error(e))

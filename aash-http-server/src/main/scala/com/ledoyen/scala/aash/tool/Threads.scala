@@ -5,6 +5,10 @@ import java.util.concurrent.Executors
 
 object Threads {
 
+  def factory(name: String) = new NamedThreadFactory(name, false)
+
+  def factoryDaemon(name: String) = new NamedThreadFactory(name, true)
+
   def single(name: String) = Executors.newSingleThreadExecutor(new NamedThreadFactory(name, false))
 
   def singleDaemon(name: String) = {
@@ -16,7 +20,7 @@ object Threads {
   class NamedThreadFactory(name: String, on: Boolean) extends ThreadFactory {
     def newThread(r: Runnable): Thread = {
       val t = new Thread(r, name)
-      t.setDaemon(on)
+      if(t.isDaemon && !on) t.setDaemon(on)
       t
     }
   }

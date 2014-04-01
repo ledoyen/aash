@@ -38,6 +38,8 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
 
   type HttpHandler = AsyncHttpHandler
 
+  val UTF8 = Charset.forName("UTF-8")
+
   val url = s"${InetAddress.getLocalHost}:$port/"
 
   private val serverImplementation = new AsyncHttpServerImpl
@@ -92,7 +94,7 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
   class SocketCompletionHandler extends CompletionHandler[AsynchronousSocketChannel, AsynchronousServerSocketChannel] {
     def completed(asc: AsynchronousSocketChannel, ssc: AsynchronousServerSocketChannel) {
       val buffer = ByteBuffer.allocate(AsyncHttpServer.BUFFER_SIZE)
-      val rch = new ReadCompletionHandler(asc, buffer, Charset.forName("UTF-8").newDecoder)
+      val rch = new ReadCompletionHandler(asc, buffer, UTF8.newDecoder)
       asc.read(buffer, null, rch)
       if (ssc.isOpen) {
         ssc.accept(ssc, new SocketCompletionHandler)
@@ -129,7 +131,7 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
             asc.read(buffer, null, this)
           } else {
             asc.shutdownInput
-            val optionalRequest = HttpUtils.parseRequest(new ByteArrayInputStream(acc.toString.getBytes))
+            val optionalRequest = HttpUtils.parseRequest(new ByteArrayInputStream(acc.toString.getBytes(UTF8)))
             optionalRequest match {
               case None =>
                 asc.close; return
@@ -143,7 +145,7 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
                     request.listenerPath = l._1
                     l._2(request, new WriteCallBackImpl(asc, split))
                   } case None => {
-                    new WriteCallBackImpl(asc, None).write(Http.notFound(request))
+                    new WriteCallBackImpl(asc, None).write(Http.notFound)
                   }
                 }
               }
@@ -163,7 +165,7 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
   class WriteCompletionHandler(asc: AsynchronousSocketChannel, buffer: ByteBuffer) extends CompletionHandler[Integer, Option[Split]] {
     def completed(bytes: Integer, split: Option[Split]): Unit = {
       if (!asc.isOpen) return
-      if (buffer.hasRemaining()) {
+      if (buffer.hasRemaining) {
         asc.write(buffer, null, this)
       } else {
         split.foreach(_.stop)
@@ -187,7 +189,7 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
 
   private class WriteCallBackImpl(asc: AsynchronousSocketChannel, split: Option[Split]) extends WriteCallback {
     def write(response: HttpResponse) = {
-      val sendingBuffer = ByteBuffer.wrap(response.toHttpLiteral.getBytes)
+      val sendingBuffer = ByteBuffer.wrap(response.toHttpLiteral.getBytes(UTF8))
       asc.write(sendingBuffer, split, new WriteCompletionHandler(asc, sendingBuffer))
     }
   }

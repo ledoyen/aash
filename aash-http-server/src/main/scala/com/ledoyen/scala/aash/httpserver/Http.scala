@@ -25,8 +25,8 @@ object Http {
 
   def parse(source: String): Date = HTTP_DATE_FORMAT.parse(source)
 
-  def notFound(request: HttpRequest): HttpResponse = {
-    new HttpResponse(request.version, StatusCode.NOT_FOUND, "<TITLE>404 - NOT FOUND</TITLE>\r\n<P>Content cannot be found</P>")
+  def notFound: HttpResponse = {
+    new HttpResponse("HTTP/1.1", StatusCode.NOT_FOUND, "<TITLE>404 - NOT FOUND</TITLE>\r\n<P>Content cannot be found</P>")
   }
 
   def error(e: Throwable): HttpResponse = {
