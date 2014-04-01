@@ -143,7 +143,7 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
                     request.listenerPath = l._1
                     l._2(request, new WriteCallBackImpl(asc, split))
                   } case None => {
-                    Http.notFound(request)
+                    new WriteCallBackImpl(asc, None).write(Http.notFound(request))
                   }
                 }
               }
@@ -154,7 +154,7 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
         }
       }
       def failed(exception: Throwable, nothing: Void) = {
-        HttpServer.logger.warn("Unable to read from socket", exception)
+        HttpServer.logger.warn("Unable to complete reading from socket", exception)
         new WriteCallBackImpl(asc, None).write(Http.error(exception))
       }
     }
@@ -172,7 +172,7 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
       }
     }
     def failed(exception: Throwable, split: Option[Split]) = {
-      HttpServer.logger.warn("Unable to compete writing", exception)
+      HttpServer.logger.warn("Unable to complete writing to socket", exception)
       split.foreach(_.stop)
       asc.shutdownOutput
       asc.close
