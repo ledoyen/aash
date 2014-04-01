@@ -7,7 +7,11 @@ object Threads {
 
   def single(name: String) = Executors.newSingleThreadExecutor(new NamedThreadFactory(name, false))
 
-  def singleDaemon(name: String) = Executors.newSingleThreadExecutor(new NamedThreadFactory(name, true))
+  def singleDaemon(name: String) = {
+    val executor = Executors.newSingleThreadExecutor(new NamedThreadFactory(name, true))
+    executor.submit(new Runnable{ def run = {}})
+    executor
+  }
   
   class NamedThreadFactory(name: String, on: Boolean) extends ThreadFactory {
     def newThread(r: Runnable): Thread = {

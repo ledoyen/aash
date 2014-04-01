@@ -80,7 +80,14 @@ server.registerAsyncListener("/file",
 
 You cannot reuse the __core single thread pool__ to delegate tasks as its full time job is to read from / write to the Socket Channel.
 
-So when using the __Java NIO__ [AsynchronousFileChannel](http://openjdk.java.net/projects/nio/javadoc/java/nio/channels/AsynchronousFileChannel.html) with custom ExecutorService,
-as recommanded if you want to keep your thread number under control, you will face the spawn of at least one "rogue" Thread created internally by 
+When using the __Java NIO__ [AsynchronousFileChannel](http://openjdk.java.net/projects/nio/javadoc/java/nio/channels/AsynchronousFileChannel.html) with custom `ExecutorService`,
+as recommended if you want to keep your thread number under control, you will face the spawn of "rogue" Threads created internally by 
 [AsynchronousChannelGroupImpl](http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/sun/nio/ch/AsynchronousChannelGroupImpl.java#AsynchronousChannelGroupImpl.startThreads%28java.lang.Runnable%29), 
-typically named Thread-0.
+typically named Thread-X.
+
+Those threads will only last during the file reading, so you can see them just when requesting [http://localhost/file](http://localhost/file).
+
+As Thread creation is resource consuming, it will be a great improvement to get rid of it and only use the given `ExecutorService`, as `AsynchronousChannelGroup` does have a 
+method `withFixedThreadPool(int nThreads, ThreadFactory threadFactory)` which does not imply the Thread creation side-effect.
+
+However for now (jdk1.8.0_20, `AsynchronousFileChannel` is not wired to this method.
