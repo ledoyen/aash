@@ -21,7 +21,6 @@ object AsyncFiles {
         decoder.reset
         val part = decoder.decode(buffer).toString
         callback(part)
-        //            callback.write(HttpResponse(req.version, StatusCode.OK, part))
         asyncChannel.close
       }
       def failed(t: Throwable, nothing: Void) = {

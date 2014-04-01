@@ -59,15 +59,15 @@ server.resetStatistics
 
 Aash HTTP Server provides also (in beta phase for now) an asynchronous implementation, using [AsynchronousServerSocketChannel](http://docs.oracle.com/javase/7/docs/api/java/nio/channels/AsynchronousServerSocketChannel.html).
 
-This server works with a single thread handling HTTP read / write and other treatments you may want to run between.
+This server works with a __single thread__ handling HTTP read / write and other processing you may want to run between.
 
 This implementation is meant to be used with asynchronous IO or immediate computation.
 
-If any treatment is hanging (SQL request for example), the server will not be able to treat more than the current connexion.
+If any treatment is hanging (SQL request for example), the server will not be able to treat more than the current connection.
 
 ```scala
 val server = HttpServer.async.start
-// Synchronous version, "emulate" Sync server behavior, for simple and fast computations
+// Synchronous listeners works as in the Synchronous server, sync behavior is "emulated"
 server.registerListener("/hello",
 	req => HttpResponse(req.version, StatusCode.OK, "<h1>Hello World !</h1>"))
 // Asynchronous version (example with some file reading)
@@ -77,3 +77,10 @@ server.registerAsyncListener("/file",
             content => callback.write(HttpResponse(req.version, StatusCode.OK, content)))
       })
 ```
+
+You cannot reuse the __core single thread pool__ to delegate tasks as its full time job is to read from / write to the Socket Channel.
+
+So when using the __Java NIO__ [AsynchronousFileChannel](http://openjdk.java.net/projects/nio/javadoc/java/nio/channels/AsynchronousFileChannel.html) with custom ExecutorService,
+as recommanded if you want to keep your thread number under control, you will face the spawn of at least one "rogue" Thread created internally by 
+[AsynchronousChannelGroupImpl](http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/sun/nio/ch/AsynchronousChannelGroupImpl.java#AsynchronousChannelGroupImpl.startThreads%28java.lang.Runnable%29), 
+typically named Thread-0.
