@@ -4,28 +4,28 @@ An expression parser, for simple stuff without using ANTLR.
 
 ## Bean Path expressions
 
-To parse a bean path expression, use the following code :
+Aash Parser allows to parse a bean path expression :
 
 ```java
 String expression = "userTruc.maTable[variable.attribute == false | (toto > 18 & userTruc[*].family in [\"toto\", \"titi\"])].tableau[length(texte)].name";
 DottedExpression parsedExpression = ExpressionParser.parseDotted(expression);
 System.out.println(parsedExpression);
 ```
-
+will display :
 ```bash
 userTruc.maTable[((variable.attribute = false) | ((toto > 18.0) & (userTruc[*].family E ["toto", "titi"])))].tableau[length(texte)].name
 ```
 
 ## Arithmetic expressions
 
-For arithmetic expression, use the following code :
+it can also parse arithmetic expression :
 
 ```java
 String expression = "date(variable.attribute) == false | 1 == 0 | false";
 DottedExpression parsedExpression = ExpressionParser.parseArithmetic(expression);
 System.out.println(parsedExpression);
 ```
-
+will display :
 ```bash
 (((date(variable.attribute) = false) | (1.0 = 0.0)) | false)
 ```
@@ -40,7 +40,7 @@ parsedExpression.accept(v);
 System.out.println(v.toString());
 ```
 
-The Visitor implementation do have the responsability to call `accept` on children where there is.
+The Visitor implementation do have the responsability to call `accept` on children where there are.
 
 This way you can do stuff before and after this call, for example :
 
