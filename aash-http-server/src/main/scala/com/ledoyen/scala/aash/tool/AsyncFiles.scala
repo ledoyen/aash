@@ -19,6 +19,7 @@ object AsyncFiles {
     val decoder = Charset.forName("UTF-8").newDecoder
     asyncChannel.read(buffer, 0, null, new CompletionHandler[Integer, Void] {
       def completed(bytes: Integer, nothing: Void) = {
+        // TODO the recursive stuff for greater files
         buffer.flip
         decoder.reset
         val part = decoder.decode(buffer).toString

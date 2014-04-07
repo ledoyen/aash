@@ -18,6 +18,12 @@ Here you will find projects I create to help me in my day-to-day work, and... ma
 
 
 ### Upcoming :
+ * __Aash Report__ : Schedule SQL requests and send produced tables and graphs by email, packaged as WAR or Standalone _(running on Aash HTTP Server)_
+ * __Crested Monitor__ : Dashboard to monitor your systems, checking them through :
+   * ping
+   * telnet
+   * http
+   * sql
  * __Art Gen__ : Graphical generator based on frequency analysis from :
    * songs
    * pictures

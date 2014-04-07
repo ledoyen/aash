@@ -28,6 +28,7 @@ import sun.nio.ch.AsynchronousChannelGroupImpl
 
 /**
  * http://openjdk.java.net/projects/nio/presentations/TS-4222.pdf
+ * TODO implements websocket handling, sample on https://github.com/TooTallNate/Java-WebSocket
  */
 object AsyncHttpServer {
 

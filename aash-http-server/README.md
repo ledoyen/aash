@@ -90,4 +90,4 @@ Those threads will only last during the file reading, so you can see them just w
 As Thread creation is resource consuming, it will be a great improvement to get rid of it and only use the given `ExecutorService`, as `AsynchronousChannelGroup` does have a 
 method `withFixedThreadPool(int nThreads, ThreadFactory threadFactory)` which does not imply the Thread creation side-effect.
 
-However for now (jdk1.8.0_20, `AsynchronousFileChannel` is not wired to this method.
+However for now (jdk1.8.0_20, `AsynchronousFileChannel` and the `FileSystemProvider` within are not wired to use this method.
