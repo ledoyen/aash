@@ -1,4 +1,4 @@
-package com.ledoyen.scala.aash.httpserver.extended
+package com.ledoyen.scala.aash.httpserver.extended.view
 
 import java.net.URL
 import com.ledoyen.scala.aash.httpserver._
@@ -10,13 +10,13 @@ object ForwardView {
 
   def remainingPath(req: HttpRequest): String = req.path.substring(req.listenerPath.length)
 
-  def replaceUrls(listenerPath: String)(body: String): String = {
-    body
+  def replaceUrls(listenerPath: String)(body: Option[String]): Option[String] = {
+    body.map(b => b
       .replaceAllLiterally("href=\"/", "href=\"" + listenerPath + "/")
       .replaceAllLiterally("src=\"/", "href=\"" + listenerPath + "/")
       // replace all nor relatives
       .replaceAllLiterally("href=\"" + listenerPath + "//", "href=\"//")
-      .replaceAllLiterally("src=\"" + listenerPath + "//", "href=\"//")
+      .replaceAllLiterally("src=\"" + listenerPath + "//", "href=\"//"))
   }
 }
 
@@ -27,7 +27,7 @@ class ForwardView(val rootUrl: URL) extends (HttpRequest => HttpResponse) {
   def apply(req: HttpRequest): HttpResponse = {
     Http.connect(rootUrl, req.withPath(ForwardView.remainingPath(req))) match {
       case Some(resp) => {
-        val r = resp.changeBody(ForwardView.replaceUrls(req.listenerPath))
+        val r = resp.body(ForwardView.replaceUrls(req.listenerPath)(resp.body))
         ForwardView.logger.trace(r.toString)
         r
       }
@@ -41,7 +41,7 @@ class AsyncForwardView(val rootUrl: URL) extends ((HttpRequest, WriteCallback) =
   def apply(req: HttpRequest, callback: WriteCallback) = {
     AsyncHttp.connect(rootUrl, req.withPath(ForwardView.remainingPath(req)), true, maybe => maybe match {
       case Right(resp) => {
-        val r = resp.changeBody(ForwardView.replaceUrls(req.listenerPath))
+        val r = resp.body(ForwardView.replaceUrls(req.listenerPath)(resp.body))
         ForwardView.logger.trace(r.toString)
         callback.write(r)
       }

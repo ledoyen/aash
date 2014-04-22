@@ -43,7 +43,7 @@ trait HttpServer {
     if (req.getParameters.get("reset").exists("true" == _)) resetStatistics
     if (req.getParameters.get("enable").exists("true" == _)) enableStatistics
     if (req.getParameters.get("enable").exists("false" == _)) disableStatistics
-    new HttpResponse(req.version, StatusCode.OK, s"Active threads : ${Thread.activeCount} \r\n${simons.mkString("\r\n")}", Map("Content-type" -> "text/plain; charset=UTF-8"))
+    HttpResponse(StatusCode.OK, s"Active threads : ${Thread.activeCount} \r\n${simons.mkString("\r\n")}", Map("Content-type" -> "text/plain; charset=UTF-8"))
   }
 
   def registerAppropriateListener(path: String, listener: HttpHandler): Unit = pathListeners += (path -> listener)
@@ -73,4 +73,5 @@ trait HttpServer {
 
 trait WriteCallback {
   def write(response: HttpResponse)
+  def write(response: StreamedHttpResponse)
 }

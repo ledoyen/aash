@@ -18,21 +18,21 @@ object AsyncHttpServerTest {
       (req, callback) => {
         AsyncFiles.read(
           path = Paths.get(getClass.getClassLoader.getResource("file.txt").toURI),
-          callback = (content) => callback.write(HttpResponse(req.version, StatusCode.OK, content)))
+          callback = (content) => callback.write(HttpResponse(StatusCode.OK, content)))
       })
 
     server.registerAsyncListener("/file2",
       (req, callback) => {
         AsyncFiles.read(
           path = Paths.get(getClass.getClassLoader.getResource("file2.txt").toURI),
-          callback = (content) => callback.write(HttpResponse(req.version, StatusCode.OK, content)))
+          callback = (content) => callback.write(HttpResponse(StatusCode.OK, content)))
       })
 
     server.registerAsyncListener("/file3",
       (req, callback) => {
         AsyncFiles.read(
           path = Paths.get(getClass.getClassLoader.getResource("file3.txt").toURI),
-          callback = (content) => callback.write(HttpResponse(req.version, StatusCode.OK, content)))
+          callback = (content) => callback.write(HttpResponse(StatusCode.OK, content)))
       })
   }
 }

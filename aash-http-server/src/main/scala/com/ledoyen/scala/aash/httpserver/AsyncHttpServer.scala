@@ -66,11 +66,11 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
   class AsyncHttpServerImpl {
     import scala.reflect.runtime.universe._
     import scala.reflect.runtime.currentMirror
-    import scala.reflect.runtime.{universe => ru}
+    import scala.reflect.runtime.{ universe => ru }
 
     HttpServer.logger.debug(s"Starting Async HTTP Server on port [$port]")
     val group = AsynchronousChannelGroup.withFixedThreadPool(1, new EventLoopThreadFactory)
-    
+
     val ssc = AsynchronousServerSocketChannel.open(group).bind(new InetSocketAddress("localhost", port))
 
     def eventLoopThreadGroup = group
@@ -116,7 +116,7 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
       }
     }
 
-    class ReadCompletionHandler(asc: AsynchronousSocketChannel, buffer: ByteBuffer, decoder: CharsetDecoder) extends CompletionHandler[Integer, Void] {
+    private class ReadCompletionHandler(asc: AsynchronousSocketChannel, buffer: ByteBuffer, decoder: CharsetDecoder) extends CompletionHandler[Integer, Void] {
       var acc = ""
       def completed(bytes: Integer, nothing: Void): Unit = {
         if (!asc.isOpen) return
@@ -138,7 +138,7 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
                 asc.close; return
               case Some(request) => {
                 val split = Options.option(statActive, SimonManager.getStopwatch(s"HTTP-$port-${request.path.replace("/", "")}").start)
-                HttpServer.logger.trace(s"$request")
+                //                HttpServer.logger.trace(s"$request")
                 // If any async listener is registered
                 val asyncListener = Http.getListener(pathListeners, request.path)
                 asyncListener match {
@@ -163,15 +163,22 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
     }
   }
 
-  class WriteCompletionHandler(asc: AsynchronousSocketChannel, buffer: ByteBuffer) extends CompletionHandler[Integer, Option[Split]] {
+  private class WriteCompletionHandler(asc: AsynchronousSocketChannel, buffer: ByteBuffer, endCallback: Option[(AsynchronousSocketChannel) => Unit] = None) extends CompletionHandler[Integer, Option[Split]] {
     def completed(bytes: Integer, split: Option[Split]): Unit = {
       if (!asc.isOpen) return
       if (buffer.hasRemaining) {
         asc.write(buffer, null, this)
       } else {
-        split.foreach(_.stop)
-        asc.shutdownOutput
-        asc.close
+        endCallback match {
+          case Some(c) => {
+            c(asc)
+          }
+          case None => {
+            split.foreach(_.stop)
+            asc.shutdownOutput
+            asc.close
+          }
+        }
       }
     }
     def failed(exception: Throwable, split: Option[Split]) = {
@@ -192,6 +199,13 @@ class AsyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executo
     def write(response: HttpResponse) = {
       val sendingBuffer = ByteBuffer.wrap(response.toHttpLiteral.getBytes(UTF8))
       asc.write(sendingBuffer, split, new WriteCompletionHandler(asc, sendingBuffer))
+    }
+
+    def write(response: StreamedHttpResponse) = {
+      val sendingBuffer = ByteBuffer.wrap(response.toHttpLiteral.getBytes(UTF8))
+      asc.write(sendingBuffer, split, new WriteCompletionHandler(asc, sendingBuffer, Some(asc => {
+//        response.readBody(content => {})
+      })))
     }
   }
 }

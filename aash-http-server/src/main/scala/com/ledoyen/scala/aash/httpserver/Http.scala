@@ -20,18 +20,20 @@ object Http {
   type HttpHandler = HttpRequest => HttpResponse
 
   val HTTP_DATE_FORMAT = new java.text.SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH)
+  
+  val VERSION = "HTTP/1.1"
 
   def format(date: Date): String = HTTP_DATE_FORMAT.format(date)
 
   def parse(source: String): Date = HTTP_DATE_FORMAT.parse(source)
 
   def notFound: HttpResponse = {
-    new HttpResponse("HTTP/1.1", StatusCode.NOT_FOUND, "<TITLE>404 - NOT FOUND</TITLE>\r\n<P>Content cannot be found</P>")
+    HttpResponse(StatusCode.NOT_FOUND, "<TITLE>404 - NOT FOUND</TITLE>\r\n<P>Content cannot be found</P>")
   }
 
   def error(e: Throwable): HttpResponse = {
     val body = s"<TITLE>500 - INTERNAL SERVER ERROR</TITLE>\r\n <p><b>${e.getClass.getName} ${e.getMessage}</b></p><p>${e.getStackTrace() mkString ("</p>\r\n<p>")}</p>"
-    new HttpResponse("HTTP/1.1", StatusCode.INTERNAL_SERVER_ERROR, body)
+    HttpResponse(StatusCode.INTERNAL_SERVER_ERROR, body)
   }
 
   def connect(url: URL, req: HttpRequest, followRedirect: Boolean = true): Option[HttpResponse] = {
@@ -104,7 +106,7 @@ object Http {
       val headers = HttpUtils.readHeaders(in, Map())
       val body = readResponseBody(in, is, headers.getIC("Content-Length").map(_.toInt))
 
-      Option(new HttpResponse(version, code, body, headers))
+      Option(HttpResponse(code, body, headers))
     } else None
   }
 

@@ -44,7 +44,7 @@ class HttpServerTest {
       (req, callback) => {
         AsyncFiles.read(
             path = Paths.get(getClass.getClassLoader.getResource("file.txt").toURI),
-            callback = (content) => callback.write(HttpResponse(req.version, StatusCode.OK, content)))
+            callback = (content) => callback.write(HttpResponse(StatusCode.OK, content)))
       })
 
     val webClient = new WebClient
@@ -56,8 +56,8 @@ class HttpServerTest {
   }
 
   def testHttpServer(server: HttpServer) = {
-    server.registerListener("/toto", req => HttpResponse(req.version, StatusCode.OK, "<h1>TOTO !</h1>"))
-    server.registerListener("/titi", req => HttpResponse(req.version, StatusCode.OK, "<h1>TITI !</h1>"))
+    server.registerListener("/toto", req => HttpResponse(StatusCode.OK, "<h1>TOTO !</h1>"))
+    server.registerListener("/titi", req => HttpResponse(StatusCode.OK, "<h1>TITI !</h1>"))
     server.registerListener("/stat", server.statistics)
     server.enableStatistics
 

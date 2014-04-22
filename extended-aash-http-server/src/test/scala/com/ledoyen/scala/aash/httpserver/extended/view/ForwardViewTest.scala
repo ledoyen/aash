@@ -1,14 +1,12 @@
-package com.ledoyen.scala.aash.httpserver.extended
+package com.ledoyen.scala.aash.httpserver.extended.view
 
 import org.junit.Assert._
 import com.ledoyen.scala.aash.httpserver._
-import java.net.HttpURLConnection
 import java.net.URL
 import org.junit.Test
 import com.gargoylesoftware.htmlunit.WebClient
 import com.gargoylesoftware.htmlunit.html.HtmlPage
 import org.hamcrest.CoreMatchers
-import org.junit.Ignore
 
 class ForwardViewTest {
 
@@ -16,7 +14,7 @@ class ForwardViewTest {
 //  @Ignore
   def testForward() {
     val realServer = HttpServer.sync(8060).start
-    realServer.registerListener("/real", req => HttpResponse(req.version, StatusCode.OK, "<html><head><title>Hey hey !</title></head><body>toto !</body></html>", Map("Content-Type" -> "text/html")))
+    realServer.registerListener("/real", req => HttpResponse(StatusCode.OK, "<html><head><title>Hey hey !</title></head><body>toto !</body></html>", Map("Content-Type" -> "text/html")))
     val proxyServer = HttpServer.sync(8070).start
     proxyServer.registerListener("/toto", new ForwardView(new URL("http://localhost:8060/real")))
     val webClient = new WebClient
@@ -34,7 +32,7 @@ class ForwardViewTest {
 //  @Ignore
   def testAsyncForward() {
     val realServer = HttpServer.sync(8060).start
-    realServer.registerListener("/real", req => HttpResponse(req.version, StatusCode.OK, "<html><head><title>Hey hey !</title></head><body>toto !</body></html>", Map("Content-Type" -> "text/html")))
+    realServer.registerListener("/real", req => HttpResponse(StatusCode.OK, "<html><head><title>Hey hey !</title></head><body>toto !</body></html>", Map("Content-Type" -> "text/html")))
     val proxyServer = HttpServer.async(8070).start
     proxyServer.registerAsyncListener("/toto", new AsyncForwardView(new URL("http://localhost:8060/real")))
     val webClient = new WebClient

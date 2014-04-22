@@ -54,7 +54,7 @@ class SyncHttpServer(val port: Int = 80, val pool: ThreadPoolExecutor = Executor
 
   override def statistics: SyncHttpHandler = (req: HttpRequest) => {
     super.statistics
-    new HttpResponse(req.version, StatusCode.OK, s"Active threads : ${pool.getActiveCount} (${pool.getPoolSize})\r\n${simons.mkString("\r\n")}", Map("Content-type" -> "text/plain; charset=UTF-8"))
+    HttpResponse(StatusCode.OK, s"Active threads : ${pool.getActiveCount} (${pool.getPoolSize})\r\n${simons.mkString("\r\n")}", Map("Content-type" -> "text/plain; charset=UTF-8"))
   }
 
   class SyncHttpServerThread extends Thread {
