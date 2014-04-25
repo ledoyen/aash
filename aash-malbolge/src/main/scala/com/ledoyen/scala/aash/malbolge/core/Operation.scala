@@ -3,7 +3,7 @@ package com.ledoyen.scala.aash.malbolge.core
 import com.ledoyen.scala.aash.malbolge.VM
 
 object Operation {
-  def parse(value: Int) = value match {
+  def parse(value: Int, strict: Boolean = false) = value match {
     case 4 => JumpOperation
     case 5 => OutOperation
     case 23 => InOperation
@@ -12,7 +12,7 @@ object Operation {
     case 62 => CrazyOperation
     case 68 => NopOperation
     case 81 => EndOperation
-    case _ => NopOperation // throw new IllegalArgumentException(s"value $value is not mapped to any Malbolge operation")
+    case _ => if(!strict) NopOperation else throw new IllegalArgumentException(s"value ${value.toChar} ($value) is not mapped to any Malbolge operation")
   }
 }
 
@@ -27,7 +27,9 @@ case object JumpOperation extends Operation {
 
 // 5
 case object OutOperation extends Operation {
-  def apply(vm: VM) = ???
+  def apply(vm: VM) = {
+    vm.out.write(vm.a.innerValue)
+  }
 }
 
 // 23
@@ -50,7 +52,15 @@ case object CopyOperation extends Operation {
 
 // 62
 case object CrazyOperation extends Operation {
-  def apply(vm: VM) = ???
+  def apply(vm: VM) =  {
+    val memoryAtD = vm.memory(vm.d.innerValue)
+    val valueInA = vm.a.innerValue
+    
+    val computedValue = Crazy(memoryAtD, valueInA)
+    
+    vm.memory(vm.d.innerValue) = computedValue
+    vm.a.innerValue = computedValue
+  }
 }
 
 // 68
@@ -69,9 +79,9 @@ object Crazy {
     Trinary.fromTrinary(crazyOp(Trinary.toTrinary(t1), Trinary.toTrinary(t2)))
   }
 
-  def crazyOp(l1: Long, l2: Long) = {
-    var remaining1 = l1
-    var remaining2 = l2
+  def crazyOp(l1D: Long, l2A: Long) = {
+    var remaining1 = l1D
+    var remaining2 = l2A
     var result: Long = 0
 
     for (pos <- 9 to 0 by -1) {

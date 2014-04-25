@@ -41,26 +41,28 @@ class VM {
 
     breakable {
       while (true) {
-        if(processOneInstruction) break
-//        displayState
+        if (processOneInstruction) break
+        //        displayState
       }
     }
+    println("\nEND")
   }
 
   def processOneInstruction = {
-    val toTearInstruction = memory(c.innerValue) + c.innerValue
-    val instructionCode = toTearInstruction % 94
-    val op = Operation.parse(instructionCode)
-    if(op != NopOperation) println(s"$op $instructionCode")
-    	
-    if(op == EndOperation) true else {
-	    op.apply(this)
-	
-	    // Encrypt used instruction
-	    memory(c.innerValue) = Encrypt.encrypt(memory(c.innerValue) % 94)
-	
-	    // TODO end of program if op match EndOperation
-	    false
+    val decryptedInstruction = (memory(c.innerValue) + c.innerValue) % 94
+    val op = Operation.parse(decryptedInstruction)
+//    if (op != NopOperation) println(s"$op $decryptedInstruction")
+
+    if (op == EndOperation) true else {
+      op.apply(this)
+
+      // Encrypt used instruction
+      memory(c.innerValue) = Encrypt.encrypt(memory(c.innerValue) % 94)
+      
+      // Increment C & D
+      c.innerValue = c.innerValue + 1
+      d.innerValue = d.innerValue + 1
+      false
     }
   }
 
@@ -68,8 +70,24 @@ class VM {
   def displayMemory = println(memory.toList)
 
   def init(program: String) = {
-    val programAsIntArray = program.toCharArray.map(_.toInt)
-    Array.copy(programAsIntArray, 0, memory, 0, program.toCharArray.length)
+    val programAsIntArray = program.replaceAll("\\s", "").toCharArray.map(_.toInt)
+
+    // Assert Program is valid
+    for (i <- 0 until programAsIntArray.length) {
+      val memoryValue = programAsIntArray(i)
+      val decryptedValue = (programAsIntArray(i) + i) % 94
+      try {
+        val op = Operation.parse(decryptedValue, true)
+        //    			  println(op + decryptedValue.toChar.toString)
+      } catch {
+        case e: Exception => {
+          println(s"Error on ${memoryValue}(${memoryValue.toChar}) decrypted is ${decryptedValue}(${decryptedValue.toChar})")
+          throw e
+        }
+      }
+    }
+
+    Array.copy(programAsIntArray, 0, memory, 0, programAsIntArray.length)
 
     for (memoryAdress <- programAsIntArray.length to (MEMORY_SIZE - 1)) {
       memory(memoryAdress) = Crazy(memory(memoryAdress - 2), memory(memoryAdress - 1))
