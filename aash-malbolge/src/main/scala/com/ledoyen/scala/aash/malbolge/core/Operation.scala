@@ -12,12 +12,14 @@ object Operation {
     case 62 => CrazyOperation
     case 68 => NopOperation
     case 81 => EndOperation
+
     case _ => if(!strict) NopOperation else throw new IllegalArgumentException(s"value ${value.toChar} ($value) is not mapped to any Malbolge operation")
   }
 }
 
 abstract class Operation {
   def apply(vm: VM)
+  def toNormalizedCode: Char
 }
 
 // 4
@@ -26,6 +28,7 @@ abstract class Operation {
 // i
 case object JumpOperation extends Operation {
   def apply(vm: VM) = vm.c.innerValue = vm.memory(vm.d.innerValue)
+  def toNormalizedCode = 'i'
 }
 
 // 5
@@ -36,6 +39,7 @@ case object OutOperation extends Operation {
   def apply(vm: VM) = {
     vm.out.write(vm.a.innerValue % 256)
   }
+  def toNormalizedCode = '<'
 }
 
 // 23
@@ -47,6 +51,7 @@ case object InOperation extends Operation {
     // TODO handle cases of line feeds and EOF
     vm.a.innerValue = vm.in.read
   }
+  def toNormalizedCode = '/'
 }
 
 // 39
@@ -62,6 +67,7 @@ case object RotateOperation extends Operation {
     vm.memory(vm.d.innerValue) = rotated
     vm.a.innerValue = rotated
   }
+  def toNormalizedCode = '*'
 }
 
 // 40
@@ -73,6 +79,7 @@ case object CopyOperation extends Operation {
     // Copies the value at [d] to d
     vm.d.innerValue = vm.memory(vm.d.innerValue)
   }
+  def toNormalizedCode = 'j'
 }
 
 // 62
@@ -89,6 +96,7 @@ case object CrazyOperation extends Operation {
     vm.memory(vm.d.innerValue) = computedValue
     vm.a.innerValue = computedValue
   }
+  def toNormalizedCode = 'p'
 }
 
 // 68
@@ -97,6 +105,7 @@ case object CrazyOperation extends Operation {
 // o
 case object NopOperation extends Operation {
   def apply(vm: VM) = {}
+  def toNormalizedCode = 'o'
 }
 
 // 81
@@ -105,4 +114,5 @@ case object NopOperation extends Operation {
 // v
 case object EndOperation extends Operation {
   def apply(vm: VM) = ???
+  def toNormalizedCode = 'v'
 }
