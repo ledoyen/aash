@@ -2,6 +2,10 @@ package com.ledoyen.scala.aash.malbolge.core
 
 object Trinary {
 
+  def stayInMalbolgeRange(number: Int): Int = {
+    if(number >= 59049) number - 59049 else number
+  }
+
   def toTrinary(number: Int): Long = {
     assert(number <= 59049, { s"given number [$number] is > 59049, this is not possible in Malbolge" })
     if (number == 59049) 0

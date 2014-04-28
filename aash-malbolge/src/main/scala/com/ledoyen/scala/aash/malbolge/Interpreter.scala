@@ -6,6 +6,7 @@ import com.ledoyen.scala.aash.malbolge.core.Encrypt
 import com.ledoyen.scala.aash.malbolge.core.EndOperation
 import com.ledoyen.scala.aash.malbolge.core.NopOperation
 import com.ledoyen.scala.aash.malbolge.core.JumpOperation
+import com.ledoyen.scala.aash.malbolge.core.Trinary
 
 /**
  * @see http://esolangs.org/wiki/Malbolge
@@ -90,8 +91,8 @@ class VM {
       memory(c.innerValue) = Encrypt.encrypt(memory(c.innerValue) % 94)
       
       // Increment C & D
-      c.innerValue = c.innerValue + 1
-      d.innerValue = d.innerValue + 1
+      c.innerValue = Trinary.stayInMalbolgeRange(c.innerValue + 1)
+      d.innerValue = Trinary.stayInMalbolgeRange(d.innerValue + 1)
       false
     }
   }

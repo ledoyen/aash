@@ -30,4 +30,11 @@ class TrinaryTest {
     assertThat(Trinary.rotate(2111112l), CoreMatchers.equalTo(2000211111l))
     assertThat(Trinary.rotate(2111110l), CoreMatchers.equalTo(211111l))
   }
+
+  @Test
+  def testStayInMalbolgeRange = {
+    assertThat(Trinary.stayInMalbolgeRange(5645), CoreMatchers.equalTo(5645))
+    assertThat(Trinary.stayInMalbolgeRange(59049), CoreMatchers.equalTo(0))
+    assertThat(Trinary.stayInMalbolgeRange(59052), CoreMatchers.equalTo(3))
+  }
 }
