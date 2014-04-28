@@ -21,28 +21,53 @@ abstract class Operation {
 }
 
 // 4
+// Set code pointer to the value pointed to by the current data pointer.
+// C = [D]
+// i
 case object JumpOperation extends Operation {
-  def apply(vm: VM) = vm.c.innerValue = vm.memory(vm.d.innerValue) + 1
+  def apply(vm: VM) = vm.c.innerValue = vm.memory(vm.d.innerValue)
 }
 
 // 5
+// Output the character in A, modulo 256, to standard output.
+// PRINT(A%256)
+// <
 case object OutOperation extends Operation {
   def apply(vm: VM) = {
-    vm.out.write(vm.a.innerValue)
+    vm.out.write(vm.a.innerValue % 256)
   }
 }
 
 // 23
+// Input a character from standard input and store it in A.
+// A = INPUT
+// /
 case object InOperation extends Operation {
-  def apply(vm: VM) = ???
+  def apply(vm: VM) = {
+    // TODO handle cases of line feeds and EOF
+    vm.a.innerValue = vm.in.read
+  }
 }
 
 // 39
+// Tritwise rotate right.
+// A = [D] = ROTATE_RIGHT([D])
+// *
 case object RotateOperation extends Operation {
-  def apply(vm: VM) = ???
+  def apply(vm: VM) = {
+    val memoryAtD = vm.memory(vm.d.innerValue)
+
+    val rotated = Rotate(memoryAtD)
+
+    vm.memory(vm.d.innerValue) = rotated
+    vm.a.innerValue = rotated
+  }
 }
 
 // 40
+// Set data pointer to the value pointed to by the current data pointer
+// D = [D]
+// j
 case object CopyOperation extends Operation {
   def apply(vm: VM) = {
     // Copies the value at [d] to d
@@ -51,6 +76,9 @@ case object CopyOperation extends Operation {
 }
 
 // 62
+// Tritwise "crazy" operation.
+// A = [D] = CRAZY_OP(A, [D])
+// p
 case object CrazyOperation extends Operation {
   def apply(vm: VM) =  {
     val memoryAtD = vm.memory(vm.d.innerValue)
@@ -64,49 +92,17 @@ case object CrazyOperation extends Operation {
 }
 
 // 68
+// No operation.
+// NOP
+// o
 case object NopOperation extends Operation {
   def apply(vm: VM) = {}
 }
 
 // 81
+// Stop execution of the current program.
+// STOP
+// v
 case object EndOperation extends Operation {
   def apply(vm: VM) = ???
-}
-
-object Crazy {
-
-  def apply(t1: Int, t2: Int) = {
-    Trinary.fromTrinary(crazyOp(Trinary.toTrinary(t1), Trinary.toTrinary(t2)))
-  }
-
-  def crazyOp(l1D: Long, l2A: Long) = {
-    var remaining1 = l1D
-    var remaining2 = l2A
-    var result: Long = 0
-
-    for (pos <- 9 to 0 by -1) {
-      val pow = Math.pow(10, pos).toInt
-
-      val digit1 = remaining1 / pow
-      if (digit1 != 0) {
-        remaining1 = remaining1 - digit1 * pow
-      }
-      val digit2 = remaining2 / pow
-      if (digit2 != 0) {
-        remaining2 = remaining2 - digit2 * pow
-      }
-
-      val crazyDigit =
-        if (digit1 == 0) {
-          if (digit2 == 0) 1 else 0
-        } else if (digit1 == 1) {
-          if (digit2 == 0) 1 else if(digit2 == 1) 0 else 2
-        } else {
-          if (digit2 == 2) 1 else 2
-        }
-      
-      result = result + crazyDigit * Math.pow(10, pos).toInt
-    }
-    result
-  }
 }

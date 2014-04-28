@@ -59,6 +59,9 @@
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
+				<includes>
+					<include>*.mlb</include>
+				</includes>
 			</resource>
 		</resources>
 		<plugins>
