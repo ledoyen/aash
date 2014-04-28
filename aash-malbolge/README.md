@@ -22,4 +22,4 @@ Or even pass an inline Malbolge program :
 > java -jar com.ledoyen.scala.aash.malbolge.Interpreter inline (=<`:9876Z4321UT.-Q+*)M'&%$H\"!~}|Bzy?=|{z]KwZY44Eq0/{mlk**hKs_dG5[m_BA{?-Y;;Vb'rR5431M}/.zHGwEDCBA@98\6543W10/.R,+O<
 ```
 
-** Beware ** when using the inline mode that double quotes `"` are naturally escaped by Java CLI, so escape them writing `\"` instead !
+__Beware__ when using the inline mode that double quotes `"` are naturally escaped by Java CLI, so escape them writing `\"` instead !
