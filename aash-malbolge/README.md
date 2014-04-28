@@ -11,7 +11,9 @@ To use Aash Malbolge Interpreter, you can use the available CLI :
 ```
 
 __command :__ run or normalize
+
 __type :__ classpath, file or inline
+
 __content :__ according to the type : classpath location, path or in-line program
 
 ## Run a program
@@ -55,7 +57,7 @@ All previously used types (__classpath__, __file__ and __inline__) are available
 
 ```bash
 Hello, world.
-END
+END [a=29486 c=115 d=94]
 ```
 
 ### Normalizing embedded Cat program

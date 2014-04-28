@@ -75,6 +75,7 @@ object Interpreter {
     println("\t>java -jar aash-malbolge.jar run classpath helloWorld.mlb")
     println("\t>java -jar aash-malbolge.jar normalize file \"/home/helloWorld.mlb\"")
   }
+
   def normalize(program: String): String = normalizeRec(program.toList, Nil, 0).mkString
 
   // TailRec is needed for long program that may result in StackOverflow otherwise
@@ -112,7 +113,7 @@ class VM {
 
   val memory = Array.fill(MEMORY_SIZE) { 0 } //Array[Int](59049)
 
-  def state = s"State [$a $c $d]"
+  def state = s"[$a $c $d]"
 
   def execute(program: String) = {
     import scala.util.control.Breaks._
@@ -126,7 +127,7 @@ class VM {
         //        displayState
       }
     }
-    println("\nEND")
+    println("\nEND " + state)
   }
 
   def processOneInstruction = {
@@ -146,8 +147,8 @@ class VM {
     }
   }
 
-  def displayState = println(state)
-  def displayMemory = println(memory.toList)
+  def displayState = println(s"State $state")
+  def displayMemory = println(s"Memory ${memory.toList}")
 
   def init(program: String) = {
     val programAsIntArray = program.replaceAll("\\s", "").toCharArray.map(_.toInt)
