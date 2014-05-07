@@ -40,11 +40,13 @@ object Interpreter {
         i.execute(program)
       }
       case "normalize" => println(Normalizer.normalize(program))
+      case "unnormalize" => println(Normalizer.unNormalize(program))
+      case "print" => println(program)
     }
   }
 
   def parseArgs(args: Array[String]): (String, String, String) = {
-    val command = argAtPos(args, 0, List("run", "normalize"))
+    val command = argAtPos(args, 0, List("run", "normalize", "unnormalize", "print"))
     val vType = argAtPos(args, 1, List("classpath", "file", "inline"))
     val content = argAtPos(args, 2)
 

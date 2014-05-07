@@ -10,7 +10,7 @@ To use Aash Malbolge Interpreter, you can use the available CLI :
 > java -jar aash-malbolge.jar <command> <type> <content>
 ```
 
-__command :__ run or normalize
+__command :__ run, normalize, unnormalize or print
 
 __type :__ classpath, file or inline
 
@@ -47,6 +47,12 @@ To normalize a Malbolge program, simply run the following :
 
 All previously used types (__classpath__, __file__ and __inline__) are available for `normalize` command.
 
+## Un-normalize a program
+To un-normalize a normalized Malbolge program, use :
+
+```bash
+> java -jar aash-malbolge.jar unnormalize file "/home/some_text_file"
+```
 
 ## Samples
 
@@ -83,4 +89,23 @@ ooooooooooooooooooooo*ooooj
 ooooooooooooooooooooo*ooooj
 oooooopoooopooooooooooooooj
 ooooooooooi
+```
+
+### Un-normalizing the inlined HelloWorld program
+```bash
+> java -jar aash-malbolge.jar unnormalize inline jpp<ppppp<pppp<<pp<ppp<pppp<ppppp<pp<ioooj/ojji</oiivoooi<ojvpoj/pvojj<j/o*jov/<ojjj*o/jj/oo/oooooopp<pppp<pppp<pp<v
+```
+
+```bash
+(=<`:9876Z4321UT.-Q+*)M'&%$H"!~}|Bzy?=|{z]KwZY44Eq0/{mlk**hKs_dG5[m_BA{?-Y;;Vb'rR5431M}/.zHGwEDCBA@98\6543W10/.R,+O<
+```
+
+### Printing the embedded HelloWorld program
+```bash
+> java -jar aash-malbolge.jar print classpath helloWorld.mlb
+```
+
+```bash
+(=<`:9876Z4321UT.-Q+*)M'&%$H"!~}|Bzy?=|{z]KwZY44Eq0/{mlk**
+ hKs_dG5[m_BA{?-Y;;Vb'rR5431M}/.zHGwEDCBA@98\6543W10/.R,+O<
 ```
