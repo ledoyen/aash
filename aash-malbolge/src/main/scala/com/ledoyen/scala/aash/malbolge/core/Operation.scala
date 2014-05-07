@@ -1,8 +1,7 @@
 package com.ledoyen.scala.aash.malbolge.core
 
-import com.ledoyen.scala.aash.malbolge.VM
-
 object Operation {
+
   def parse(value: Int, strict: Boolean = false) = value match {
     case 4 => JumpOperation
     case 5 => OutOperation
@@ -13,13 +12,36 @@ object Operation {
     case 68 => NopOperation
     case 81 => EndOperation
 
-    case _ => if(!strict) NopOperation else throw new IllegalArgumentException(s"value ${value.toChar} ($value) is not mapped to any Malbolge operation")
+    case _ => if (!strict) NopOperation else throw new IllegalArgumentException(s"Value ${value.toChar} ($value) is not mapped to any Malbolge operation")
+  }
+
+  def parseNormalized(value: Char) = value match {
+    case 'i' => JumpOperation
+    case '<' => OutOperation
+    case '/' => InOperation
+    case '*' => RotateOperation
+    case 'j' => CopyOperation
+    case 'p' => CrazyOperation
+    case 'o' => NopOperation
+    case 'v' => EndOperation
+
+    case _ => throw new IllegalArgumentException(s"Normalized value ${value} is not mapped to any Malbolge operation")
   }
 }
 
 abstract class Operation {
   def apply(vm: VM)
   def toNormalizedCode: Char
+  def value: Int
+  def toBaseValue(pos: Int): Int = {
+    var potentialValue = value - pos
+    if(potentialValue > 126) potentialValue % 94 else {
+      while(potentialValue < 33) {
+        potentialValue = potentialValue + 94
+      }
+      potentialValue
+    }
+  }
 }
 
 // 4
@@ -29,6 +51,7 @@ abstract class Operation {
 case object JumpOperation extends Operation {
   def apply(vm: VM) = vm.c.innerValue = vm.memory(vm.d.innerValue)
   def toNormalizedCode = 'i'
+  def value = 4
 }
 
 // 5
@@ -40,6 +63,7 @@ case object OutOperation extends Operation {
     vm.out.write(vm.a.innerValue % 256)
   }
   def toNormalizedCode = '<'
+  def value = 5
 }
 
 // 23
@@ -52,6 +76,7 @@ case object InOperation extends Operation {
     vm.a.innerValue = vm.in.read
   }
   def toNormalizedCode = '/'
+  def value = 23
 }
 
 // 39
@@ -68,6 +93,7 @@ case object RotateOperation extends Operation {
     vm.a.innerValue = rotated
   }
   def toNormalizedCode = '*'
+  def value = 39
 }
 
 // 40
@@ -80,6 +106,7 @@ case object CopyOperation extends Operation {
     vm.d.innerValue = vm.memory(vm.d.innerValue)
   }
   def toNormalizedCode = 'j'
+  def value = 40
 }
 
 // 62
@@ -87,16 +114,17 @@ case object CopyOperation extends Operation {
 // A = [D] = CRAZY_OP(A, [D])
 // p
 case object CrazyOperation extends Operation {
-  def apply(vm: VM) =  {
+  def apply(vm: VM) = {
     val memoryAtD = vm.memory(vm.d.innerValue)
     val valueInA = vm.a.innerValue
-    
+
     val computedValue = Crazy(memoryAtD, valueInA)
-    
+
     vm.memory(vm.d.innerValue) = computedValue
     vm.a.innerValue = computedValue
   }
   def toNormalizedCode = 'p'
+  def value = 62
 }
 
 // 68
@@ -106,6 +134,7 @@ case object CrazyOperation extends Operation {
 case object NopOperation extends Operation {
   def apply(vm: VM) = {}
   def toNormalizedCode = 'o'
+  def value = 68
 }
 
 // 81
@@ -115,4 +144,5 @@ case object NopOperation extends Operation {
 case object EndOperation extends Operation {
   def apply(vm: VM) = ???
   def toNormalizedCode = 'v'
+  def value = 81
 }
