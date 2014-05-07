@@ -57,7 +57,7 @@ All previously used types (__classpath__, __file__ and __inline__) are available
 
 ```bash
 Hello, world.
-END [a=29486 c=115 d=94]
+END [a=29486 c=115 d=94] within 54 instructions in 355 ms
 ```
 
 ### Normalizing embedded Cat program

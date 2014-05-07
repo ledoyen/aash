@@ -19,6 +19,7 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
   def execute(program: String, maxInstructions: Option[Int] = None, quiet: Boolean = false, normalized: Boolean = false) = {
     import scala.util.control.Breaks._
 
+    val startTime = System.currentTimeMillis
     val instructionCount = new AtomicLong
     // init memory
     init(program, normalized)
@@ -32,7 +33,8 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
         //        displayState
       }
     }
-    if(!quiet) println(s"\nEND $state within ${instructionCount.longValue} instructions")
+    val duration = System.currentTimeMillis - startTime
+    if(!quiet) println(s"\nEND $state within ${instructionCount.longValue} instructions in $duration ms")
     instructionCount.longValue
   }
 
