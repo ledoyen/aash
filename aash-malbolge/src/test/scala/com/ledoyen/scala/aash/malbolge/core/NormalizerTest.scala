@@ -22,6 +22,9 @@ class NormalizerTest {
   def testNormalizeBijection = {
     val normalizedProgram = Normalizer.normalize(NormalizerTest.program)
     val unNormalizedProgram = Normalizer.unNormalize(normalizedProgram)
+    println(unNormalizedProgram)
+    println("")
+    println(normalizedProgram)
     assertThat(unNormalizedProgram, CoreMatchers.equalTo(NormalizerTest.program))
     assertThat(Normalizer.normalize(unNormalizedProgram), CoreMatchers.equalTo(normalizedProgram))
   }

@@ -13,6 +13,7 @@ import com.ledoyen.scala.aash.malbolge.core.Normalizer
 import com.ledoyen.scala.aash.malbolge.core.VM
 
 /**
+ * @see http://www.lscheffer.com/malbolge_interp.html
  * @see http://esolangs.org/wiki/Malbolge
  */
 object Interpreter {
@@ -36,8 +37,8 @@ object Interpreter {
 
     parsedArgs._1 match {
       case "run" => {
-        val i = new VM
-        i.execute(program)
+        val vm = new VM
+        vm.execute(program)
       }
       case "normalize" => println(Normalizer.normalize(program))
       case "unnormalize" => println(Normalizer.unNormalize(program))

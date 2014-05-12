@@ -3,6 +3,7 @@ package com.ledoyen.scala.aash.malbolge.core
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.atomic.AtomicLong
+import org.javasimon.SimonManager
 
 class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
 
@@ -14,6 +15,8 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
 
   val memory = Array.fill(MEMORY_SIZE) { 0 } //Array[Int](59049)
 
+  override def toString = state
+
   def state = s"[$a $c $d]"
 
   def execute(program: String, maxInstructions: Option[Int] = None, quiet: Boolean = false, normalized: Boolean = false) = {
@@ -22,8 +25,11 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
     val startTime = System.currentTimeMillis
     val instructionCount = new AtomicLong
     // init memory
+    val split = SimonManager.getStopwatch("init").start
     init(program, normalized)
+    split.stop
 
+    val split2 = SimonManager.getStopwatch("run").start
     breakable {
       while (true) {
         if (processOneInstruction) break
@@ -34,6 +40,7 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
       }
     }
     val duration = System.currentTimeMillis - startTime
+    split2.stop
     if(!quiet) println(s"\nEND $state within ${instructionCount.longValue} instructions in $duration ms")
     instructionCount.longValue
   }
@@ -59,11 +66,19 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
   def displayMemory = println(s"Memory ${memory.toList}")
 
   def init(program: String, normalized: Boolean) = {
-    val programInMemoryLength = if(normalized) initNormalized(program) else initClassic(program)
+    a.innerValue = 0
+    c.innerValue = 0
+    d.innerValue = 0
 
+    val split = SimonManager.getStopwatch("init-program").start
+    val programInMemoryLength = if(normalized) initNormalized(program) else initClassic(program)
+    split.stop
+
+    val split2 = SimonManager.getStopwatch("init-memory").start
     for (memoryAdress <- programInMemoryLength to (MEMORY_SIZE - 1)) {
       memory(memoryAdress) = Crazy(memory(memoryAdress - 2), memory(memoryAdress - 1))
     }
+    split2.stop
   }
   
   def initClassic(program: String): Int = {

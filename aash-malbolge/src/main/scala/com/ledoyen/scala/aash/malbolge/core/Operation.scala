@@ -27,6 +27,8 @@ object Operation {
 
     case _ => throw new IllegalArgumentException(s"Normalized value ${value} is not mapped to any Malbolge operation")
   }
+
+  def operations = List(JumpOperation, OutOperation, InOperation, RotateOperation, CopyOperation, CrazyOperation, NopOperation, EndOperation)
 }
 
 abstract class Operation {
