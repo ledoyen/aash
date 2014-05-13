@@ -9,6 +9,8 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
 
   val MEMORY_SIZE = 59049
 
+  val instructionCount = new AtomicLong
+
   val a = new Register("a")
   val c = new Register("c")
   val d = new Register("d")
@@ -23,7 +25,7 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
     import scala.util.control.Breaks._
 
     val startTime = System.currentTimeMillis
-    val instructionCount = new AtomicLong
+    
     // init memory
     val split = SimonManager.getStopwatch("init").start
     init(program, normalized)
@@ -69,6 +71,8 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
     a.innerValue = 0
     c.innerValue = 0
     d.innerValue = 0
+
+    instructionCount.set(0l)
 
     val split = SimonManager.getStopwatch("init-program").start
     val programInMemoryLength = if(normalized) initNormalized(program) else initClassic(program)

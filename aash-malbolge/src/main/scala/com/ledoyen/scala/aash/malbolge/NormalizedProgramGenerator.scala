@@ -6,17 +6,20 @@ import java.io.File
 import java.io.BufferedWriter
 import java.io.FileWriter
 import com.ledoyen.scala.aash.malbolge.core.Normalizer
+import scala.io.Source
 
 object NormalizedProgramGenerator {
 
-  val MAX_GEN = 4
+  val MAX_GEN = 2
 
   def main(args: Array[String]): Unit = {
     val startTime = System.currentTimeMillis
 
-    val progs = genrec(Operation.operations.map(op => List(op.toNormalizedCode)), MAX_GEN, List()).par.map(lst => lst.mkString) // .map(p => Normalizer.unNormalize(p))
+//    val initProgs = Operation.operations.map(op => List(op.toNormalizedCode))
     
-//    val progs = normalizedProgs.map(p => Normalizer.unNormalize(p))
+    val initProgs = Source.fromFile("c:\\malbolge_matching_results.txt").mkString.split("\n").map(_.toCharArray.toList).toList
+    
+    val progs = genrec(initProgs, MAX_GEN, List()).par.map(lst => lst.mkString) // .map(p => Normalizer.unNormalize(p))
     
     writeToFile("c:\\malbolge_progs.txt", progs.mkString("\n"))
     

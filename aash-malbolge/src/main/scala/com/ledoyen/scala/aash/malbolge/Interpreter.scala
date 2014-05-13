@@ -13,7 +13,9 @@ import com.ledoyen.scala.aash.malbolge.core.Normalizer
 import com.ledoyen.scala.aash.malbolge.core.VM
 
 /**
+ * @see http://www.lscheffer.com/malbolge.shtml
  * @see http://www.lscheffer.com/malbolge_interp.html
+ * @see http://www.acooke.org/malbolge.html
  * @see http://esolangs.org/wiki/Malbolge
  */
 object Interpreter {

@@ -8,15 +8,15 @@ import java.io.InputStream
 object BatchInterpreter {
 
   def main(args: Array[String]): Unit = {
-    val progs = Source.fromFile("c:\\malbolge_progs.txt").mkString.split("\n")
+    val progs = Source.fromFile("c:\\malbolge_progs.txt").mkString.split("\n").filter(_.length > 5)
     
     val startTime = System.currentTimeMillis
-    val results = progs.filter(_.length > 1).par.map(p => run(p))
+    val results = progs.par.map(p => run(p))
     
     NormalizedProgramGenerator.writeToFile("c:\\malbolge_progs_results.txt", results.mkString("\n"))
     
     val duration = (System.currentTimeMillis - startTime) / 1000
-    println(s"\n\n ==========> END in $duration sec")
+    println(s"\n\n ==========> END interpreting ${progs.size} programs in $duration sec")
   }
 
   def run(prog: String) = {
@@ -39,7 +39,7 @@ object BatchInterpreter {
     
     val progOutput = new String(output.toByteArray).replaceAll("\n", "\\n").replaceAll("\r", "\\r")
     
-    val result = s"$prog \t\t=>\t\t $progOutput \t\t\t\t$message"
+    val result = s"$prog\t\t=>\t\t$progOutput\t\t\t\t$message"
 //    println(result)
     result
   }
