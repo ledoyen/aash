@@ -10,7 +10,7 @@ import com.ledoyen.scala.aash.tool.Dates
 
 object BeamSearch {
 
-  val START_ITERATION = 1
+  val START_ITERATION = 11
   val rootPath = "c:\\malbolge"
 
   def main(args: Array[String]): Unit = {
@@ -24,7 +24,7 @@ object BeamSearch {
 	    1
     } else START_ITERATION
 
-    for (i <- startIteration to 10) {
+    for (i <- startIteration to 100) {
       searchIteration(i, 1, None, 100)
     }
   }
@@ -57,7 +57,7 @@ object BeamSearch {
 
     // Analyze interpretations
     val eligibleInterpretations = Analyzer.analyze(interpretations, beamWidth)
-    println(s"Number of matching programs : ${eligibleInterpretations.size} with lowest (best) score : ${eligibleInterpretations(0)._1} (${eligibleInterpretations(0)._2})\t\tafter ${Dates.smartParse(System.currentTimeMillis - startTime)}")
+    println(s"Number of matching programs : ${eligibleInterpretations.size} with lowest (best) score : ${eligibleInterpretations(0)._1} ${eligibleInterpretations(0)._2}\t\tafter ${Dates.smartParse(System.currentTimeMillis - startTime)}")
 
     // Save Eligible programs
     storeEligiblePrograms(iterationNumber, eligibleInterpretations)

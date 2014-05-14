@@ -12,6 +12,6 @@ object Analyzer {
 
   def countPoints(interpretation: (String, String, Long, String)): Long = {
     val commonPrefix = RESULT_TO_MATCH.zip(interpretation._2).takeWhile(Function.tupled(_ == _)).map(_._1).mkString
-    interpretation._3 - (commonPrefix.length * 10)
+    interpretation._3 - (interpretation._2.size * 3) - (commonPrefix.length * 10)
   }
 }
