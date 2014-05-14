@@ -5,20 +5,26 @@ import com.ledoyen.scala.aash.malbolge.core.Operation
 import com.ledoyen.scala.aash.tool.Files
 import scala.collection.parallel.immutable.ParSeq
 import scala.io.Source
+import java.util.Date
+import com.ledoyen.scala.aash.tool.Dates
 
 object BeamSearch {
 
+  val START_ITERATION = 0
   val rootPath = "c:\\malbolge"
 
   def main(args: Array[String]): Unit = {
     Files.createFolderIfNotExists(rootPath)
 
-    val initProgs = Operation.operations.map(op => List(op.toNormalizedCode))
-    // Start with all 8 operations as base programs
-    // Create all possible programs of length 5 --> 37448 programs
-    searchIteration(0, 5, Some(initProgs), 100)
+    val startIteration = if(START_ITERATION == 0) {
+	    val initProgs = Operation.operations.map(op => List(op.toNormalizedCode))
+	    // Start with all 8 operations as base programs
+	    // Create all possible programs of length 5 --> 37448 programs
+	    searchIteration(0, 5, Some(initProgs), 100)
+	    1
+    } else START_ITERATION
 
-    for (i <- 1 to 10) {
+    for (i <- startIteration to 10) {
       searchIteration(i, 3, None, 100)
     }
   }
@@ -29,28 +35,29 @@ object BeamSearch {
     println(s"############# ITERATION $iterationNumber #############")
     println("#######################################")
     println(s"\tlength=$length\tbeamWidth=$beamWidth")
+    println(new Date)
     println("#######################################")
 
     val initProgs = opInitProgs.getOrElse(readEligiblePrograms(iterationNumber - 1))
     println(s"Number of initial programs : ${initProgs.size}")
 
     // Create all possible programs of length length (5 => 37448 programs)
-    val progs = Generator.genrec(initProgs, length, List()).par
-    println(s"Number of generated programs : ${progs.size}\t\tafter ${(System.currentTimeMillis - startTime) / 1000} sec")
+    val progs = Generator.genrec(initProgs, length, List()).par.filter(_.size > 1)
+    println(s"Number of generated programs : ${progs.size}\t\tafter ${Dates.smartParse(System.currentTimeMillis - startTime)}")
 
     // Save programs in file
     storePrograms(iterationNumber, progs)
 
     // Interpret programs
     val interpretations = BatchInterpreter.interpret(progs)
-    println(s"Interpretation done after ${(System.currentTimeMillis - startTime) / 1000} sec")
+    println(s"Interpretation done after ${Dates.smartParse(System.currentTimeMillis - startTime)}")
 
     // Save interpretations in file
     storeInterpretations(iterationNumber, interpretations)
 
     // Analyze interpretations
     val eligibleInterpretations = Analyzer.analyze(interpretations, beamWidth)
-    println(s"Number of matching programs : ${eligibleInterpretations.size} with lowest (best) score : ${eligibleInterpretations(0)._1}\t\tafter ${(System.currentTimeMillis - startTime) / 1000} sec")
+    println(s"Number of matching programs : ${eligibleInterpretations.size} with lowest (best) score : ${eligibleInterpretations(0)._1}\t\tafter ${Dates.smartParse(System.currentTimeMillis - startTime)}")
 
     // Save Eligible programs
     storeEligiblePrograms(iterationNumber, eligibleInterpretations)
