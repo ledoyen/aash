@@ -15,7 +15,7 @@ import com.ledoyen.aash.junit.runner.mockito.MockitoPlugin;
 import com.ledoyen.aash.junit.runner.spring.Pojo2;
 import com.ledoyen.aash.junit.runner.spring.SpringPlugin;
 
-@RunWith(AashCoreRunner.class)
+@RunWith(AashJUnitRunner.class)
 @PluginConfiguration({SpringPlugin.class, MockitoPlugin.class})
 @ContextConfiguration("classpath:applicationContext.xml")
 public class SpringAndMockitoTest {

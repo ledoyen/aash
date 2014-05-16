@@ -13,13 +13,13 @@ import com.ledoyen.aash.tool.Collections2;
 import com.ledoyen.aash.tool.Reflections;
 import com.ledoyen.aash.tool.UnitFunction;
 
-public class AashCoreRunner extends BlockJUnit4ClassRunner {
+public class AashJUnitRunner extends BlockJUnit4ClassRunner {
 
 	private List<Plugin> plugins = new ArrayList<Plugin>();
 
 	private TestContext context = new TestContext();
 
-	public AashCoreRunner(Class<?> klass) throws InitializationError {
+	public AashJUnitRunner(Class<?> klass) throws InitializationError {
 		super(klass);
 		context.setTestClazz(klass);
 		init();
