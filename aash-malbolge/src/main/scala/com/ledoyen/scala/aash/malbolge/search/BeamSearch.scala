@@ -8,25 +8,36 @@ import scala.io.Source
 import java.util.Date
 import com.ledoyen.scala.aash.tool.Dates
 
+// Interpretations :
+// 800 	-> 2-3min
+// 4000 -> 14min
+// 8000 -> 20-25 min
 object BeamSearch {
 
-  val START_ITERATION = 11
+  val SKIP_FIRST_INTERPRETATION = false
+
+  val START_ITERATION = 0
+  val END_ITERATION = 100
+  val BEAM_WIDTH = 1000
   val rootPath = "c:\\malbolge"
 
   def main(args: Array[String]): Unit = {
+    val startTime = System.currentTimeMillis
     Files.createFolderIfNotExists(rootPath)
 
-    val startIteration = if(START_ITERATION == 0) {
-	    val initProgs = Operation.operations.map(op => List(op.toNormalizedCode))
-	    // Start with all 8 operations as base programs
-	    // Create all possible programs of length 5 --> 37448 programs
-	    searchIteration(0, 4, Some(initProgs), 100)
-	    1
+    val startIteration = if (START_ITERATION == 0) {
+      val initProgs = Operation.operations.map(op => List(op.toNormalizedCode))
+      // Start with all 8 operations as base programs
+      // Create all possible programs of length 3
+      searchIteration(0, 3, Some(initProgs), BEAM_WIDTH)
+      1
     } else START_ITERATION
 
-    for (i <- startIteration to 100) {
-      searchIteration(i, 1, None, 100)
+    for (i <- startIteration to END_ITERATION) {
+      searchIteration(i, 1, None, BEAM_WIDTH)
     }
+
+    println(s"TOTAL END\t\tafter ${Dates.smartParse(System.currentTimeMillis - startTime)}")
   }
 
   def searchIteration(iterationNumber: Int, length: Int, opInitProgs: Option[List[List[Char]]] = None, beamWidth: Int) = {
@@ -37,23 +48,30 @@ object BeamSearch {
     println(new Date)
     println(s"length=$length\tbeamWidth=$beamWidth")
 
-    val initProgs = opInitProgs.getOrElse(readEligiblePrograms(iterationNumber - 1))
-    println(s"Number of initial programs : ${initProgs.size}")
+    val interpretations = if (SKIP_FIRST_INTERPRETATION && iterationNumber == 0) {
+      val interpretations = readInterpretations(iterationNumber).par
+      println(s"==> SKIP INTERPRETATION, reading ${interpretations.size} already interpreted results")
+      interpretations
+    } else {
+      val initProgs = opInitProgs.getOrElse(readEligiblePrograms(iterationNumber - 1))
+      println(s"Number of initial programs : ${initProgs.size}")
 
-    // Create all possible programs of length length (5 => 37448 programs)
-    val progs = Generator.genreclast(initProgs, length).par
-    val finalProgs = progs.diff(initProgs)
-    println(s"Number of generated programs : ${finalProgs.size}\t\tafter ${Dates.smartParse(System.currentTimeMillis - startTime)}")
+      // Create all possible programs of length length (5 => 37448 programs)
+      val progs = Generator.genreclast(initProgs, length).par
+      val finalProgs = progs.diff(initProgs)
+      println(s"Number of generated programs : ${finalProgs.size}\t\tafter ${Dates.smartParse(System.currentTimeMillis - startTime)}")
 
-    // Save programs in file
-    storePrograms(iterationNumber, finalProgs)
+      // Save programs in file
+      storePrograms(iterationNumber, finalProgs)
 
-    // Interpret programs
-    val interpretations = BatchInterpreter.interpret(finalProgs)
-    println(s"Interpretation done after ${Dates.smartParse(System.currentTimeMillis - startTime)}")
+      // Interpret programs
+      val interpretations = BatchInterpreter.interpret(finalProgs)
+      println(s"Interpretation done after ${Dates.smartParse(System.currentTimeMillis - startTime)}")
 
-    // Save interpretations in file
-    storeInterpretations(iterationNumber, interpretations)
+      // Save interpretations in file
+      storeInterpretations(iterationNumber, interpretations)
+      interpretations
+    }
 
     // Analyze interpretations
     val eligibleInterpretations = Analyzer.analyze(interpretations, beamWidth)
@@ -68,6 +86,14 @@ object BeamSearch {
 
   def readEligiblePrograms(tag: Int) = {
     Source.fromFile(s"$rootPath\\$tag\\eligible_programs.txt").mkString.split("\n").map(_.toCharArray.toList).toList
+  }
+
+  def readInterpretations(tag: Int): ParSeq[(String, String, Long, String)] = {
+    def parseLine(line: String): (String, String, Long, String) = {
+      val splited = line.split("\t\t\t\t")
+      (splited(0), splited(1), splited(2).toLong, splited(3))
+    }
+    Source.fromFile(s"$rootPath\\$tag\\results.txt").mkString.split("\n").map(parseLine(_)).toList.par
   }
 
   def storePrograms(tag: Int, progs: ParSeq[List[Char]]) = {

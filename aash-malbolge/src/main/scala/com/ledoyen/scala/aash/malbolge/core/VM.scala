@@ -5,17 +5,16 @@ import java.io.OutputStream
 import java.util.concurrent.atomic.AtomicLong
 import org.javasimon.SimonManager
 
-class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
+class VM(var in: InputStream = System.in, var out: OutputStream = System.out, val memory: Memory = new LazyMemory) {
 
-  val MEMORY_SIZE = 59049
+  var exited = false
 
   val instructionCount = new AtomicLong
 
   val a = new Register("a")
   val c = new Register("c")
   val d = new Register("d")
-
-  val memory = Array.fill(MEMORY_SIZE) { 0 } //Array[Int](59049)
+  var lastOperation: Operation = null
 
   override def toString = state
 
@@ -25,7 +24,11 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
     import scala.util.control.Breaks._
 
     val startTime = System.currentTimeMillis
-    
+
+    Runtime.getRuntime().addShutdownHook(new Thread {
+      override def run = if(exited) println(endMessage(startTime))
+    })
+
     // init memory
     val split = SimonManager.getStopwatch("init").start
     init(program, normalized)
@@ -35,21 +38,26 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
     breakable {
       while (true) {
         if (processOneInstruction) break
-        instructionCount.incrementAndGet()
+        instructionCount.incrementAndGet
         val mustStop = maxInstructions.map(instructionCount.longValue > _).getOrElse(false)
-        if(mustStop) throw new IllegalStateException(s"Maximum number of instructions reached [$maxInstructions]")
+        if (mustStop) throw new IllegalStateException(s"Maximum number of instructions reached [$maxInstructions]")
         //        displayState
       }
     }
-    val duration = System.currentTimeMillis - startTime
     split2.stop
-    if(!quiet) println(s"\nEND $state within ${instructionCount.longValue} instructions in $duration ms")
+    if (!quiet) println(endMessage(startTime))
     instructionCount.longValue
+  }
+
+  def endMessage(startTime: Long) = {
+    val duration = System.currentTimeMillis - startTime
+    s"\nEND $state within ${instructionCount.longValue} instructions in $duration ms   (used memory cells : ${memory.usedMemory} / program length : ${memory.programLength})"
   }
 
   def processOneInstruction = {
     val decryptedInstruction = (memory(c.innerValue) + c.innerValue) % 94
     val op = Operation.parse(decryptedInstruction)
+    lastOperation = op
 
     if (op == EndOperation) true else {
       op.apply(this)
@@ -74,17 +82,9 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
 
     instructionCount.set(0l)
 
-    val split = SimonManager.getStopwatch("init-program").start
-    val programInMemoryLength = if(normalized) initNormalized(program) else initClassic(program)
-    split.stop
-
-    val split2 = SimonManager.getStopwatch("init-memory").start
-    for (memoryAdress <- programInMemoryLength to (MEMORY_SIZE - 1)) {
-      memory(memoryAdress) = Crazy(memory(memoryAdress - 2), memory(memoryAdress - 1))
-    }
-    split2.stop
+    val programInMemoryLength = if (normalized) initNormalized(program) else initClassic(program)
   }
-  
+
   def initClassic(program: String): Int = {
     val programAsIntArray = program.replaceAll("\\s", "").toCharArray.map(_.toInt)
 
@@ -102,11 +102,12 @@ class VM(val in: InputStream = System.in, val out: OutputStream = System.out) {
       }
     }
 
-    Array.copy(programAsIntArray, 0, memory, 0, programAsIntArray.length)
-    
+    memory.setProgramAndInit(programAsIntArray)
+    //    Array.copy(programAsIntArray, 0, memory, 0, programAsIntArray.length)
+
     programAsIntArray.length
   }
-  
+
   def initNormalized(program: String): Int = {
     initClassic(Normalizer.unNormalize(program))
   }

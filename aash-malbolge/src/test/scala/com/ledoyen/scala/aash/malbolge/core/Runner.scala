@@ -5,7 +5,7 @@ import java.io.InputStream
 
 object Runner {
 
-  val prog = "jpp<ppppp<pppp<<pp<ppp<pppp<ppppp<pp<ioooj/ojji</oiivoooi<"
+  val prog = "jpp<ppppp<pppp<<pp<ppp<pp"
     
     def main(args: Array[String]): Unit = {
     
