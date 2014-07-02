@@ -5,6 +5,7 @@ Here you will find projects I create to help me in my day-to-day work, and... ma
 ### Already in Production :
  * [SQL-Query-Builder](https://github.com/ledoyen/aash/tree/master/sql-query-builder) : A tool to help you compose native SQL queries
  * [Aash Malbolge Interpreter](https://github.com/ledoyen/aash/tree/master/aash-malbolge) : Famous esoteric language [Malbolge](http://esolangs.org/wiki/Malbolge) interpreter written in Scala
+ * [Aash evaluator](https://github.com/ledoyen/aash/tree/master/aash-evaluator) : A Janino wrapper for Java expression evaluation
 
 ### Beta-test :
  * [Aash HTTP Server](https://github.com/ledoyen/aash/tree/master/aash-http-server) : An __async__ HTTP server written in Scala
@@ -16,6 +17,7 @@ Here you will find projects I create to help me in my day-to-day work, and... ma
    * chat overflows
    * server management inputs
    * etc.
+ * [Aash Malbolge Search](https://github.com/ledoyen/aash/tree/master/aash-malbolge) : Beam search algorithm to find Malbolge program like Andrew Cooke one's
 
 
 ### Upcoming :
