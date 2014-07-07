@@ -30,3 +30,7 @@ Here you will find projects I create to help me in my day-to-day work, and... ma
  * __Art Gen__ : Graphical generator based on frequency analysis from :
    * songs
    * pictures
+ * __Temporal DB__ : 
+   * __POJO Generator__ A Java Annotation Processor generating a _Temporal_ version of annotated POJO (meaning a second POJO with each field / method with type `Temporal<FieldType>`
+   * __Core DB__
+   * __DB API__ : saving POJO, finding _Temporal_ version
