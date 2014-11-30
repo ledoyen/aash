@@ -50,7 +50,6 @@
 			<groupId>org.javasimon</groupId>
 			<artifactId>javasimon-core</artifactId>
 			<version>3.4.0</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
