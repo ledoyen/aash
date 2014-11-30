@@ -1,5 +1,7 @@
 package com.ledoyen.scala.aash.search
 
+import scala.annotation.tailrec
+
 object Search {
 
   def binary_tree(x: Int) = List(2 * x, 2 * x + 1)
@@ -23,6 +25,7 @@ object Search {
   def sorter[T](cost_fn: T => Int) = (_new: List[T], old: List[T]) => (_new ::: old).sortWith((t1, t2) => cost_fn(t1) < cost_fn(t2))
 
   /** Find a state that satisfies goal-p.  Start with states, and search according to successors and combiner. */
+  @tailrec
   def tree_search[T](states: List[T], goal_p: T => Boolean, successors: T => List[T], combiner: (List[T], List[T]) => List[T]): T = {
     println(s";; Search: $states");
     if (states.length == 0) fail

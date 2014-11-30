@@ -5,7 +5,7 @@ import com.ledoyen.scala.aash.malbolge.core.Operation
 
 object BeamSearch2 {
 
-  val TARGET = "I am the king of hell."
+  val TARGET = "Hello, world."
 
   def main(args: Array[String]): Unit = {
 
@@ -19,7 +19,7 @@ object BeamSearch2 {
   def cost_fn(program: String) = {
     val resolved = resolve(program)
     val commonPrefix = TARGET.zip(resolved._2).takeWhile(Function.tupled(_ == _)).map(_._1).mkString
-    resolved._1 - commonPrefix.length() * 10
+    commonPrefix.length() * 10 - resolved._1
   }
 
   def resolve(program: String): (Int, String) = {
