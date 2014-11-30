@@ -20,6 +20,8 @@ class VM(var in: InputStream = System.in, var out: OutputStream = System.out, va
 
   def state = s"[$a $c $d]"
 
+  def memoryAccess = memory.access
+
   def execute(program: String, maxInstructions: Option[Int] = None, quiet: Boolean = false, normalized: Boolean = false) = {
     import scala.util.control.Breaks._
 

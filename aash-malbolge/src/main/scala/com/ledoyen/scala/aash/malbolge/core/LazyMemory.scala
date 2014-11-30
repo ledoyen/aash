@@ -2,7 +2,7 @@ package com.ledoyen.scala.aash.malbolge.core
 
 class LazyMemory extends Memory {
 
-  private val innerMemory = Array.fill(MEMORY_SIZE) { 0 }
+  private val innerMemory = new Array[Int](MEMORY_SIZE) //Array.fill(MEMORY_SIZE) { 0 }
   
   private var pl = 0
 

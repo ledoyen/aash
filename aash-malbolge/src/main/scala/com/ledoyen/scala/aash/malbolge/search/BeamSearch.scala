@@ -8,6 +8,8 @@ import scala.io.Source
 import java.util.Date
 import com.ledoyen.scala.aash.tool.Dates
 
+
+// http://norvig.com/paip/search.lisp
 // Interpretations :
 // 800 	-> 2-3min
 // 4000 -> 14min
@@ -18,7 +20,7 @@ object BeamSearch {
 
   val START_ITERATION = 0
   val END_ITERATION = 100
-  val BEAM_WIDTH = 1000
+  val BEAM_WIDTH = 10000
   val rootPath = "c:\\malbolge"
 
   def main(args: Array[String]): Unit = {
@@ -88,10 +90,10 @@ object BeamSearch {
     Source.fromFile(s"$rootPath\\$tag\\eligible_programs.txt").mkString.split("\n").map(_.toCharArray.toList).toList
   }
 
-  def readInterpretations(tag: Int): ParSeq[(String, String, Long, String)] = {
-    def parseLine(line: String): (String, String, Long, String) = {
+  def readInterpretations(tag: Int): ParSeq[(String, String, Long, String, Int)] = {
+    def parseLine(line: String): (String, String, Long, String, Int) = {
       val splited = line.split("\t\t\t\t")
-      (splited(0), splited(1), splited(2).toLong, splited(3))
+      (splited(0), splited(1), splited(2).toLong, splited(3), splited(4).toInt)
     }
     Source.fromFile(s"$rootPath\\$tag\\results.txt").mkString.split("\n").map(parseLine(_)).toList.par
   }
@@ -104,11 +106,11 @@ object BeamSearch {
   /**
    * Assume that #storePrograms have been called on this tag before and so folder already exists.
    */
-  def storeInterpretations(tag: Int, interpretations: ParSeq[(String, String, Long, String)]) = {
-    Files.writeToFile(s"$rootPath\\$tag\\results.txt", interpretations.map(tu => s"${tu._1}\t\t\t\t${tu._2}\t\t\t\t${tu._3}\t\t\t\t${tu._4}").mkString("\n"))
+  def storeInterpretations(tag: Int, interpretations: ParSeq[(String, String, Long, String, Int)]) = {
+    Files.writeToFile(s"$rootPath\\$tag\\results.txt", interpretations.map(tu => s"${tu._1}\t\t\t\t${tu._2}\t\t\t\t${tu._3}\t\t\t\t${tu._4}\t\t\t\t${tu._5}").mkString("\n"))
   }
 
-  def storeEligiblePrograms(tag: Int, eligibleInterpretations: List[(Long, (String, String, Long, String))]) = {
+  def storeEligiblePrograms(tag: Int, eligibleInterpretations: List[(Long, (String, String, Long, String, Int))]) = {
     Files.writeToFile(s"$rootPath\\$tag\\eligible_programs.txt", eligibleInterpretations.map(tu => tu._2._1).mkString("\n"))
   }
 }

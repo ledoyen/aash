@@ -33,7 +33,7 @@ object BatchInterpreter {
 
     val instructionCount = vm.instructionCount.longValue
 
-    val result = (prog, progOutput, instructionCount, message)
+    val result = (prog, progOutput, instructionCount, message, vm.memoryAccess)
 
     result
   }
