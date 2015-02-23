@@ -2,7 +2,7 @@
 
 __Requires Java 8__
 
-This is a __tree structured context__ supporting storage of value or expressions (currently only [spring-expression](http://docs.spring.io/spring/docs/current/spring-framework-reference/html/expressions.html) is supported).
+This is a __tree structured context__ supporting storage of values or expressions (currently only [spring-expression](http://docs.spring.io/spring/docs/current/spring-framework-reference/html/expressions.html) is supported).
 
 Use this when you need scopes for your variables.
 
@@ -41,7 +41,7 @@ ScopedContext firstLevel = root.createChild().put("key", overrided");
 firstLevel.getParent().get().get("key"); // evaluates to "value"
 ```
 
-However in certain cases, global scopes needs to be shield from this kind of navigation (environmental scope for example).
+However in certain cases, global scopes needs to be shielded from this kind of navigation (environmental scope for example).
 
 ```java
 ScopedContext root = ScopedContext.create().put("key", "value");

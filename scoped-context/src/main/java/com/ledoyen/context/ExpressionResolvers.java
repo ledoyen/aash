@@ -9,8 +9,7 @@ public final class ExpressionResolvers {
 
     private static final boolean springExpressionAvailable = Classes.isClassPresent("org.springframework.expression.Expression");
 
-    private ExpressionResolvers() {
-    }
+    private ExpressionResolvers() {}
 
     static ExpressionResolver getAvailableResolver() {
         if (springExpressionAvailable) {

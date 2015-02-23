@@ -71,11 +71,11 @@ public class ScopedContextTest {
     }
 
     @Test
-    public void shield_child_should_have_parent_values_but_do_not_permit_parent_retrieval() {
-        ScopedContext immutable = ScopedContext.create().put("key", "value").shield();
+    public void shielded_child_should_have_parent_values_but_do_not_permit_parent_retrieval() {
+        ScopedContext shielded = ScopedContext.create().put("key", "value").shield();
 
-        assertThat(immutable.get("key"), Matchers.equalTo(Optional.of("value")));
-        assertThat(immutable.getParent(), Matchers.equalTo(Optional.empty()));
+        assertThat(shielded.get("key"), Matchers.equalTo(Optional.of("value")));
+        assertThat(shielded.getParent(), Matchers.equalTo(Optional.empty()));
     }
 
     @Test
@@ -90,5 +90,16 @@ public class ScopedContextTest {
     @Test
     public void expression_referencing_absent_key_should_return_null() {
         assertThat(ScopedContext.create().putExpression("expr", "#key").get("expr"), Matchers.equalTo(Optional.empty()));
+    }
+
+    @Test
+    public void thread_safe_context_should_work_as_none_one() {
+        ScopedContext root = ScopedContext.createThreadSafe().put("key", "value").putExpression("expr", "#key");
+        ScopedContext child = root.createChild().put("key", "overrided");
+
+        assertThat(root.get("key"), Matchers.equalTo(Optional.of("value")));
+        assertThat(root.get("expr"), Matchers.equalTo(Optional.of("value")));
+        assertThat(child.get("key"), Matchers.equalTo(Optional.of("overrided")));
+        assertThat(child.get("expr"), Matchers.equalTo(Optional.of("overrided")));
     }
 }
