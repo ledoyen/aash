@@ -5,6 +5,8 @@
 	<groupId>com.ledoyen</groupId>
 	<artifactId>cuke-salad</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<name>Cuke salad</name>
+	<description>Brings Spring auto-mocker, cucumber and predefined stepDefs, to test real @Configurations with BDD.</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -62,6 +64,4 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	<name>Cuke salad</name>
-	<description>Brings Spring auto-mocker, cucumber and predefined stepDefs, to test real @Configurations with BDD.</description>
 </project>
