@@ -10,6 +10,7 @@ Currently Auto-mocker context supports :
 * mocking of `@Controller` beans
 
 > Application.java
+
 ```java
 @SpringBootApplication
 @PropertySource("classpath:app.properties")
@@ -31,6 +32,7 @@ public class Application {
 ```
 
 > Test.java
+
 ```java
 try (ConfigurableApplicationContext context = AutoMockerContextBuilder.newBuilder()
 				.mockPropertySources(StringMap.of("test", "43")).buildWithJavaConfig(Application.class)) {
