@@ -1,4 +1,4 @@
-package com.ledoyen.cukesalad.sampleApp.server;
+package com.ledoyen.cukesalad.sampleApp.app1.server;
 
 import javax.annotation.Resource;
 

@@ -9,7 +9,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.ledoyen.cukesalad.automocker.AutoMockerContextBuilder;
-import com.ledoyen.cukesalad.sampleApp.Application;
+import com.ledoyen.cukesalad.sampleApp.app1.Application;
 import com.ledoyen.cukesalad.tools.StringMap;
 
 public class DemoTest {
