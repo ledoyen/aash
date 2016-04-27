@@ -1,22 +1,25 @@
 package com.ledoyen.cukesalad.demo;
 
-import java.util.Map;
-
-import org.springframework.beans.BeansException;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import com.ledoyen.cukesalad.CukeSaladAnnotationContext;
+import com.ledoyen.cukesalad.automocker.AutoMockerContextBuilder;
 import com.ledoyen.cukesalad.sampleApp.Application;
 import com.ledoyen.cukesalad.tools.StringMap;
 
 public class DemoTest {
 
-	public static void main(String[] args) throws BeansException, Exception {
-		Map<String, String> props = StringMap.of("test", "43");
-		try (ConfigurableApplicationContext context = new CukeSaladAnnotationContext(props, Application.class)) {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DemoTest.class);
+
+	@Test
+	public void testDemoProject() throws Exception {
+		try (ConfigurableApplicationContext context = AutoMockerContextBuilder.newBuilder()
+				.mockPropertySources(StringMap.of("test", "43")).buildWithJavaConfig(Application.class)) {
 			context.start();
 
 			context.getBean(MockMvc.class).perform(MockMvcRequestBuilders.get("/post/message1"))
@@ -24,7 +27,9 @@ public class DemoTest {
 
 			context.getBean(MockMvc.class).perform(MockMvcRequestBuilders.get("/test"))
 					.andExpect(MockMvcResultMatchers.status().isOk())
-					.andExpect(MockMvcResultMatchers.content().string("43"));
+					.andExpect(MockMvcResultMatchers.content().string("4343"));
+
+			LOGGER.info("Test OK !");
 		}
 	}
 }

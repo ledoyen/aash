@@ -1,27 +1,34 @@
-package com.ledoyen.cukesalad;
+package com.ledoyen.cukesalad.automocker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
-public class CukeSaladAnnotationContext extends AnnotationConfigApplicationContext {
+import com.ledoyen.cukesalad.automocker.api.AvailableBeanDefinitionAttributes;
 
-	static final String MOCK_POST_PROCESSOR_NAME = "ioMockPostProcessor";
-	static final String APPLICATION_PROPERTIES_ATTRIBUTE_NAME = "applicationProperties";
+class AutoMockerAnnotationContext extends AnnotationConfigApplicationContext {
+
+	private static final ByteArrayResource EMPTY_RESOURCE = new ByteArrayResource(new byte[] {});
 
 	private final Map<String, String> applicationProperties;
 	private final List<String> propertySourcesLocations;
+	private final Set<Class<?>> extensions;
 
-	public CukeSaladAnnotationContext(Map<String, String> applicationProperties, Class<?>... annotatedClasses) {
-		super();
+	public AutoMockerAnnotationContext(Map<String, String> applicationProperties, Set<Class<?>> extensions,
+			Class<?>... annotatedClasses) {
 		this.applicationProperties = applicationProperties;
+		this.extensions = extensions;
+		// @PropertySource(s) locations are identified here as it is resolved at first by ConfigurationClassParser
+		// this class is then able to substitute an EMPTY_RESOURCE when used as ResourceLoader
 		this.propertySourcesLocations = listPropertySourcesLocations(annotatedClasses);
 
 		register(annotatedClasses);
@@ -29,20 +36,22 @@ public class CukeSaladAnnotationContext extends AnnotationConfigApplicationConte
 	}
 
 	public Resource getResource(String location) {
-		final String modifiedLocation;
+		final Resource modifiedLocation;
 		if (propertySourcesLocations.contains(location)) {
-			modifiedLocation = "classpath:empty.properties";
+			modifiedLocation = EMPTY_RESOURCE;
 		} else {
-			modifiedLocation = location;
+			modifiedLocation = super.getResource(location);
 		}
-		return super.getResource(modifiedLocation);
+		return modifiedLocation;
 	}
 
 	protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		super.prepareBeanFactory(beanFactory);
-		RootBeanDefinition def = new RootBeanDefinition(IoMockPostProcessor.class);
-		def.setAttribute(APPLICATION_PROPERTIES_ATTRIBUTE_NAME, applicationProperties);
-		registerBeanDefinition(MOCK_POST_PROCESSOR_NAME, def);
+		for (Class<?> extentionClass : extensions) {
+			RootBeanDefinition def = new RootBeanDefinition(extentionClass);
+			def.setAttribute(AvailableBeanDefinitionAttributes.ATTRIBUTE_MOCKED_PROPERTY_SOURCE, applicationProperties);
+			registerBeanDefinition(extentionClass.getSimpleName(), def);
+		}
 	}
 
 	private static List<String> listPropertySourcesLocations(Class<?>[] annotatedClasses) {
