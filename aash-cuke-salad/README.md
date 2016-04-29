@@ -12,12 +12,12 @@ Consider a web application defined as :
 @RestController
 public class Application {
 
-	@Value("${test}")
-	private String test;
+	@Value("${test.response}")
+	private String testValue;
 
 	@RequestMapping("/test")
 	String test() {
-		return test;
+		return testValue;
 	}
 
 	public static void main(String[] args) {
@@ -26,7 +26,7 @@ public class Application {
 }
 ```
 
-With a file app.properties containing `test=106`.
+With a file app.properties containing `test.response=106`.
 Simply add the following test class :
 
 > RunCukeSalad.java
@@ -38,7 +38,7 @@ public class RunCukeSalad {
 
 	@MockProperties
 	public static Map<String, String> configuration() {
-		return map("key1", "43", "key2", "value");
+		return map("test.response", "43");
 	}
 }
 ```
