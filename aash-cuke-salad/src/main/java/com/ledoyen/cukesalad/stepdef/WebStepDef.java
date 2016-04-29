@@ -16,10 +16,6 @@ public class WebStepDef {
 
 	private ResultActions lastRequest;
 
-	public WebStepDef() {
-		System.out.println("hello");
-	}
-
 	@When("^a GET request is made on (.*) resource$")
 	public void a_get_request_is_made_on(String resource) throws Exception {
 		lastRequest = mockMvc.perform(MockMvcRequestBuilders.get(resource));

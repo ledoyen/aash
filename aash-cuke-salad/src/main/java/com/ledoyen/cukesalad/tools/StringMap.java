@@ -8,14 +8,14 @@ public abstract class StringMap {
 	private StringMap() {
 	}
 
-	public static Map<String, String> of(String... keyAndValues) {
+	public static Map<String, String> of(String... keysAndValues) {
 		Map<String, String> map = new HashMap<>();
 		String key = null;
-		for (int i = 0; i < keyAndValues.length; i++) {
+		for (int i = 0; i < keysAndValues.length; i++) {
 			if (i % 2 == 0) {
-				key = keyAndValues[i];
+				key = keysAndValues[i];
 			} else {
-				map.put(key, keyAndValues[i]);
+				map.put(key, keysAndValues[i]);
 			}
 		}
 		return map;
