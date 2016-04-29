@@ -20,7 +20,7 @@ class MockPropertyPlaceholderConfigurerFactory implements FactoryBean<PropertyPl
 		this.properties = new Properties();
 		this.singleton.setProperties(this.properties);
 		applicationProperties.entrySet().forEach(e -> properties.setProperty(e.getKey(), e.getValue()));
-		LOGGER.info("Mocking up " + PropertyPlaceholderConfigurer.class.getSimpleName());
+		LOGGER.debug("Mocking up " + PropertyPlaceholderConfigurer.class.getSimpleName());
 	}
 
 	@Override

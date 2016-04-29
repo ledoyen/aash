@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import org.junit.runners.model.InitializationError;
 
-import com.ledoyen.cukesalad.core.CukeSaladObjectFactory;
+import com.ledoyen.cukesalad.core.CukeSaladContext;
 import com.ledoyen.cukesalad.tools.StringMap;
 
 import cucumber.api.java.ObjectFactory;
@@ -20,7 +20,7 @@ public class CukeSalad extends Cucumber {
 	static {
 		List<String> args = new ArrayList<>();
 		args.add("-g classpath:com/ledoyen/cukesalad/stepdef");
-		System.setProperty(ObjectFactory.class.getName(), CukeSaladObjectFactory.class.getName());
+		System.setProperty(ObjectFactory.class.getName(), CukeSaladContext.class.getName());
 		System.setProperty("cucumber.options", args.stream().collect(Collectors.joining(" ")));
 	}
 

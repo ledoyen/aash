@@ -6,7 +6,10 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.util.StopWatch;
 
 import com.ledoyen.cukesalad.CukeSalad;
 import com.ledoyen.cukesalad.CukeSaladConfiguration;
@@ -15,7 +18,9 @@ import com.ledoyen.cukesalad.automocker.AutoMockerContextBuilder;
 
 import cucumber.api.java.ObjectFactory;
 
-public class CukeSaladObjectFactory implements ObjectFactory {
+public class CukeSaladContext implements ObjectFactory {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CukeSaladContext.class);
 
 	private ConfigurableApplicationContext context;
 
@@ -56,8 +61,12 @@ public class CukeSaladObjectFactory implements ObjectFactory {
 		}
 
 		if (context == null || configuration.reloadBeforeTest()) {
+			StopWatch sw = new StopWatch();
+			sw.start();
 			context = AutoMockerContextBuilder.newBuilder().mockPropertySources(properties)
 					.buildWithJavaConfig(configuration.classes());
+			sw.stop();
+			LOGGER.info("Context started in " + sw.getTotalTimeSeconds() + " seconds");
 		}
 		context.start();
 	}
