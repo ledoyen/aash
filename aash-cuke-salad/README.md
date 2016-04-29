@@ -4,8 +4,6 @@ Brings Spring **auto-mocker context** and **predefined stepDefs** to test your r
 
 Consider a web application defined as :
 
-> Application.java
-
 ```java
 @SpringBootApplication
 @PropertySource("classpath:app.properties")
@@ -29,8 +27,6 @@ public class Application {
 With a file app.properties containing `test.response=106`.
 Simply add the following test class :
 
-> RunCukeSalad.java
-
 ```java
 @RunWith(CukeSalad.class)
 @CukeSaladConfiguration(classes = Application.class)
@@ -45,12 +41,10 @@ public class RunCukeSalad {
 
 This configuration allows you to directly write Gherkin features such as :
 
-> rest.feature
-
 ```gherkin
 Feature: A test REST service
  
-Scenario: Get on some resource and test the result
+Scenario: Get test resource and assert the result
   When a GET request is made on /test resource
   Then the response code should be OK
   Then the response body should be 43
