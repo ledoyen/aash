@@ -36,7 +36,6 @@
 			<version>3.4.1</version>
 		</dependency>
 
-
 		<!-- CUCUMBER -->
 		<dependency>
 			<groupId>info.cukes</groupId>
@@ -55,12 +54,24 @@
 			<artifactId>logback-classic</artifactId>
 		</dependency>
 
-		<!-- SPRING -->
+		<!-- SPRING MVC -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- SPRING DATA-JPA & Database -->
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>provided</scope>
+        </dependency>
 	</dependencies>
 
 	<dependencyManagement>

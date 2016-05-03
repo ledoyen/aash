@@ -26,6 +26,7 @@ public class PropertySourcesPlaceholderConfigurerMocker extends BeanDefinitionRe
 		MockEnvironment mockEnv = new MockEnvironment();
 		applicationProperties.entrySet().forEach(e -> mockEnv.setProperty(e.getKey(), e.getValue()));
 		env.merge(mockEnv);
+		beanFactory.registerSingleton("mockEnvironment", new MockEnvironmentHolder(mockEnv));
 		LOGGER.debug("Mocking up " + ConfigurableEnvironment.class.getSimpleName());
 	}
 }

@@ -9,6 +9,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import com.ledoyen.cukesalad.automocker.extension.mvc.ControllerMocker;
 import com.ledoyen.cukesalad.automocker.extension.properties.PropertySourcesPlaceholderConfigurerMocker;
+import com.ledoyen.cukesalad.automocker.extension.sql.DataSourceMocker;
 
 public final class AutoMockerContextBuilder {
 
@@ -19,6 +20,7 @@ public final class AutoMockerContextBuilder {
 	private AutoMockerContextBuilder() {
 		extensions.add(ControllerMocker.class);
 		extensions.add(PropertySourcesPlaceholderConfigurerMocker.class);
+		extensions.add(DataSourceMocker.class);
 	}
 
 	public static AutoMockerContextBuilder newBuilder() {

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StopWatch;
 
@@ -15,6 +16,7 @@ import com.ledoyen.cukesalad.CukeSalad;
 import com.ledoyen.cukesalad.CukeSaladConfiguration;
 import com.ledoyen.cukesalad.MockProperties;
 import com.ledoyen.cukesalad.automocker.AutoMockerContextBuilder;
+import com.ledoyen.cukesalad.automocker.api.Resetable;
 
 import cucumber.api.java.ObjectFactory;
 
@@ -65,10 +67,19 @@ public class CukeSaladContextObjectFactory implements ObjectFactory, CukeSaladCo
 			init();
 		}
 
-		if (context == null || configuration.reloadBeforeTest()) {
+		boolean firstTime = context == null;
+		if (firstTime || configuration.reloadBeforeTest()) {
 			refreshContext();
 		}
+		if (!firstTime) {
+			resetContext();
+		}
 		context.start();
+	}
+
+	private void resetContext() {
+		context.getBeansOfType(Resetable.class).values().forEach(Resetable::reset);
+		LOGGER.info("Spring context have been reset");
 	}
 
 	private void refreshContext() {
@@ -112,7 +123,9 @@ public class CukeSaladContextObjectFactory implements ObjectFactory, CukeSaladCo
 		if (!instanceCache.containsKey(glueClass)) {
 			try {
 				T instance = glueClass.newInstance();
-				context.getAutowireCapableBeanFactory().autowireBean(instance);
+				context.getAutowireCapableBeanFactory().autowireBeanProperties(instance,
+						AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, true);
+				context.getAutowireCapableBeanFactory().initializeBean(instance, glueClass.getSimpleName());
 				instanceCache.put(glueClass, instance);
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new IllegalStateException(e);
