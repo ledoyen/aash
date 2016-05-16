@@ -13,7 +13,7 @@ import cucumber.api.CucumberOptions;
 @RunWith(CukeSalad.class)
 @CucumberOptions(plugin = { "pretty", "html:target/cucumber" }, features = "src/test/resources/features")
 @CukeSaladConfiguration(classes = Application.class)
-public class RunCucumber {
+public class RunCucumberTest {
 
 	@MockProperties
 	public static Map<String, String> configuration() {

@@ -16,17 +16,17 @@ public class WebStepDef {
 
 	private ResultActions lastRequest;
 
-	@When("^a GET request is made on (.*) resource$")
+	@When("^an HTTP GET request is made on (.*) resource$")
 	public void a_get_request_is_made_on(String resource) throws Exception {
 		lastRequest = mockMvc.perform(MockMvcRequestBuilders.get(resource));
 	}
 
-	@Then("^the response code should be OK$")
+	@Then("^the HTTP response code should be OK$")
 	public void the_response_code_should_be_ok() throws Exception {
 		lastRequest.andExpect(MockMvcResultMatchers.status().isOk());
 	}
 
-	@Then("^the response body should be (.*)$")
+	@Then("^the HTTP response body should be (.*)$")
 	public void the_response_body_should_be(String expectedBody) throws Exception {
 		lastRequest.andExpect(MockMvcResultMatchers.content().string(expectedBody));
 	}

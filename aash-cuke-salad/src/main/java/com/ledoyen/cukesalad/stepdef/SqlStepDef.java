@@ -18,7 +18,7 @@ public class SqlStepDef {
 	@Autowired
 	private DataSource dataSource;
 
-	@Given("^a table (\\S+) containing$")
+	@Given("^an SQL table (\\S+) containing$")
 	public void a_call_on_service_method_is_made(String tableName, DataTable data) throws Exception {
 		StringBuilder sql = new StringBuilder("INSERT INTO ");
 		sql.append(tableName).append(" (");
