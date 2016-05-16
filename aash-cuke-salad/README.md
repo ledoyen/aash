@@ -42,12 +42,12 @@ public class RunCukeSalad {
 This configuration allows you to directly write Gherkin features such as :
 
 ```gherkin
-Feature: A test REST service
+Feature: A REST service test
  
 Scenario: Get test resource and assert the result
-  When a GET request is made on /test resource
-  Then the response code should be OK
-  Then the response body should be 43
+  When an HTTP GET request is made on /test resource
+  Then the HTTP response code should be OK
+  Then the HTTP response body should be 43
 ```
 
 :smiling_imp:
